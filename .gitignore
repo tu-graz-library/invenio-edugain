@@ -1,0 +1,80 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+env/
+.installed.cfg
+lib/
+lib64/
+parts/
+Pipfile
+Pipfile.lock
+.Python
+sdist/
+var/
+.venv/
+*.egg
+*.egg-info/
+
+
+# Django stuff:
+*.log
+
+# end-to-end testing
+.e2e_screenshots
+
+# Idea software family
+.idea/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# MacOS
+.DS_Store
+
+# node modules
+**/*/node_modules
+node_modules
+
+# PyBuilder
+target/
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Sphinx documentation
+docs/_build/
+
+# Text-Editor swapfiles
+.*.sw?
+*.sublime-*
+
+# Translations
+*.mo
+
+# Unit test / coverage reports
+.cache
+coverage.xml
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+.tox/
+*,cover
+
+# VSCode: repository-local configuration
+.vscode/
