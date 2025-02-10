@@ -1,0 +1,41 @@
+#
+# pyproject.toml base fields
+#
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# important fields:
+dynamic = ["version"]  # these are dynamically computed by build-backend
+description = "Invenio extension for login via edugain."
+name = "invenio-edugain"
+# other fields, alphabetically:
+authors = [
+  {name = "Graz University of Technology", email = "info@tugraz.at"},
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["invenio", "edugain"]
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.12"
+# `dependencies` field:
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/tu-graz-library/invenio-edugain"
+
+#
+# tool.setuptools
+#
+[tool.setuptools.dynamic]
+version = {attr = "invenio_edugain.__version__"}
+
+[tool.setuptools.packages]
+find = {}  # use `find` directive to collect packages to be included into distributions
