@@ -5,8 +5,15 @@
 # invenio-edugain is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-"""Invenio extension for login via edugain."""
+root = true
 
-__version__ = "0.0.1"
+[*]
+indent_style = space
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
 
-__all__ = ("__version__",)
+# Python files
+[*.py]
+indent_size = 4
