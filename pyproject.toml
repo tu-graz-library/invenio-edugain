@@ -22,9 +22,22 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
 
+[project.optional-dependencies]
+tests = [
+  "pytest-black>=0.6.0",
+  "pytest-invenio>=3.0.0",
+  "ruff>=0.9.6",
+]
+
 [project.urls]
 Repository = "https://github.com/tu-graz-library/invenio-edugain"
 
+
+[tool.hatch.build]
+exclude = [
+  "run-tests.sh",
+  "tests/**",
+]
 
 [tool.hatch.version]
 path = "invenio_edugain/__init__.py"
@@ -32,6 +45,11 @@ path = "invenio_edugain/__init__.py"
 
 [tool.isort]
 profile = "black"
+
+
+[tool.pytest.ini_options]
+addopts = "--black --cov=invenio_edugain --cov-report=term-missing"
+testpaths = "tests invenio_edugain"
 
 
 [tool.ruff.lint]
@@ -49,4 +67,9 @@ ignore = [
   "TD002", "TD003",
   "TID252",
   "UP009",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**.py" = [
+  "ANN201",
 ]
