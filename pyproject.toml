@@ -19,7 +19,7 @@ classifiers = [
 keywords = ["invenio", "edugain"]
 license = {file = "LICENSE"}
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.9"
 dependencies = []
 
 [project.optional-dependencies]
