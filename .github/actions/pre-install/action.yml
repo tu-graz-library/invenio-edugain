@@ -1,0 +1,5 @@
+runs:
+  using: composite
+  steps:
+    - run: sudo apt-get install --yes xmlsec1
+      shell: bash
