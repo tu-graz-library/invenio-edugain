@@ -27,6 +27,8 @@ dependencies = [
 
 [project.optional-dependencies]
 tests = [
+  "invenio-app>=2.0.0,<3.0.0",
+  "invenio-db[postgresql]>=2.0.0,<3.0.0",
   "pytest-black>=0.6.0",
   "pytest-invenio>=3.0.0",
   "ruff>=0.9.6",
@@ -55,6 +57,7 @@ profile = "black"
 
 [tool.pytest.ini_options]
 addopts = "--black --cov=invenio_edugain --cov-report=term-missing"
+live_server_scope = "module"
 testpaths = "tests invenio_edugain"
 
 
