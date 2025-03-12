@@ -20,7 +20,9 @@ keywords = ["invenio", "edugain"]
 license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = []
+dependencies = [
+  "invenio_db>=2.0.0,<3.0.0",
+]
 
 [project.optional-dependencies]
 tests = [
@@ -28,6 +30,9 @@ tests = [
   "pytest-invenio>=3.0.0",
   "ruff>=0.9.6",
 ]
+
+[project.entry-points."invenio_db.models"]
+invenio_edugain = "invenio_edugain.models"
 
 [project.urls]
 Repository = "https://github.com/tu-graz-library/invenio-edugain"
