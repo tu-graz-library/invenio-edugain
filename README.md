@@ -22,8 +22,9 @@ Use your package installer to install `invenio_edugain`, e.g. via `pip`:
 pip install invenio_edugain
 ```
 
-When adding to an existing instance, you'll have to create the new SQL-tables used by `invenio_edugain`:
+When creating a new invenio instance, `invenio_edugain`'s SQL-tables will automatically be created with all the other tables.
+When adding to an existing instance, you'll have to create the new SQL-tables used by `invenio_edugain` like so:
 
 ```bash
-invenio db create
+invenio alembic upgrade
 ```

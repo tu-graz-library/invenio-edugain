@@ -34,6 +34,9 @@ tests = [
   "ruff>=0.9.6",
 ]
 
+[project.entry-points."invenio_db.alembic"]
+invenio_edugain = "invenio_edugain:alembic"
+
 [project.entry-points."invenio_db.models"]
 invenio_edugain = "invenio_edugain.models"
 
