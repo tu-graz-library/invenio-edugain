@@ -25,3 +25,5 @@ on:
 jobs:
   python_tests:
     uses: inveniosoftware/workflows/.github/workflows/tests-python.yml@master
+    with:
+      python-version: '["3.9", "3.12", "3.13"]'
