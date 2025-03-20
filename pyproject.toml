@@ -60,7 +60,6 @@ profile = "black"
 
 [tool.pytest.ini_options]
 addopts = "--black --cov=invenio_edugain --cov-report=term-missing"
-live_server_scope = "module"
 testpaths = "tests invenio_edugain"
 
 
