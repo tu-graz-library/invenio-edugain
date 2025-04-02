@@ -28,3 +28,12 @@ When adding to an existing instance, you'll have to create the new SQL-tables us
 ```bash
 invenio alembic upgrade
 ```
+
+## `invenio-jobs` integration
+
+`invenio-edugain`'s idp-data ingestion can be run via the _jobs_ view in the administration UI.
+Note that the _jobs_ view is hidden by default, enable it via adding the following configuration:
+
+```python
+JOBS_ADMINISTRATION_ENABLED = True
+```
