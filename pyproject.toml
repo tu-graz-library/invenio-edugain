@@ -21,8 +21,10 @@ license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
+  "invenio-celery>=2.0.0,<3.0.0",
   "invenio_db>=2.0.0,<3.0.0",
   "pysaml2>=7.5.0",
+  "validators>=0.34",
 ]
 
 [project.optional-dependencies]
@@ -33,6 +35,9 @@ tests = [
   "pytest-invenio>=3.0.0",
   "ruff>=0.9.6",
 ]
+
+[project.entry-points."invenio_celery.tasks"]
+invenio_edugain = "invenio_edugain.tasks"
 
 [project.entry-points."invenio_db.alembic"]
 invenio_edugain = "invenio_edugain:alembic"
