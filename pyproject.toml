@@ -22,7 +22,8 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
   "invenio-celery>=2.0.0,<3.0.0",
-  "invenio_db>=2.0.0,<3.0.0",
+  "invenio-db>=2.0.0,<3.0.0",
+  "invenio-jobs>=3.0.0,<4.0.0",
   "pysaml2>=7.5.0",
   "validators>=0.34",
 ]
@@ -44,6 +45,9 @@ invenio_edugain = "invenio_edugain:alembic"
 
 [project.entry-points."invenio_db.models"]
 invenio_edugain = "invenio_edugain.models"
+
+[project.entry-points."invenio_jobs.jobs"]
+ingest_idp_data = "invenio_edugain.jobs:IngestIdPDataJob"
 
 [project.urls]
 Repository = "https://github.com/tu-graz-library/invenio-edugain"
