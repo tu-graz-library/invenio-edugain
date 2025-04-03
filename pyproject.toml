@@ -36,6 +36,12 @@ tests = [
   "pytest-invenio>=3.0.0",
   "ruff>=0.9.6",
 ]
+elasticsearch7 = [
+  "invenio-search[elasticsearch7]>=3.0.0,<4.0.0",
+]
+opensearch2 = [
+  "invenio-search[opensearch2]>=3.0.0,<4.0.0",
+]
 
 [project.entry-points."invenio_celery.tasks"]
 invenio_edugain = "invenio_edugain.tasks"
