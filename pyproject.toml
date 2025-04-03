@@ -21,8 +21,11 @@ license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-  "invenio_db>=2.0.0,<3.0.0",
+  "invenio-celery>=2.0.0,<3.0.0",
+  "invenio-db>=2.0.0,<3.0.0",
+  "invenio-jobs>=3.0.0,<4.0.0",
   "pysaml2>=7.5.0",
+  "validators>=0.34",
 ]
 
 [project.optional-dependencies]
@@ -33,12 +36,24 @@ tests = [
   "pytest-invenio>=3.0.0",
   "ruff>=0.9.6",
 ]
+elasticsearch7 = [
+  "invenio-search[elasticsearch7]>=3.0.0,<4.0.0",
+]
+opensearch2 = [
+  "invenio-search[opensearch2]>=3.0.0,<4.0.0",
+]
+
+[project.entry-points."invenio_celery.tasks"]
+invenio_edugain = "invenio_edugain.tasks"
 
 [project.entry-points."invenio_db.alembic"]
 invenio_edugain = "invenio_edugain:alembic"
 
 [project.entry-points."invenio_db.models"]
 invenio_edugain = "invenio_edugain.models"
+
+[project.entry-points."invenio_jobs.jobs"]
+ingest_idp_data = "invenio_edugain.jobs:IngestIdPDataJob"
 
 [project.urls]
 Repository = "https://github.com/tu-graz-library/invenio-edugain"
