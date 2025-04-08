@@ -7,6 +7,11 @@
 
 """Invenio extension for login via edugain."""
 
+from .ext import InvenioEdugain
+
 __version__ = "0.0.1"
 
-__all__ = ("__version__",)
+__all__ = (
+    "InvenioEdugain",
+    "__version__",
+)
