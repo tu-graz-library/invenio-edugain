@@ -43,6 +43,12 @@ opensearch2 = [
   "invenio-search[opensearch2]>=3.0.0,<4.0.0",
 ]
 
+[project.entry-points."invenio_base.api_apps"]
+invenio_edugain = "invenio_edugain:InvenioEdugain"
+
+[project.entry-points."invenio_base.apps"]
+invenio_edugain = "invenio_edugain:InvenioEdugain"
+
 [project.entry-points."invenio_celery.tasks"]
 invenio_edugain = "invenio_edugain.tasks"
 
