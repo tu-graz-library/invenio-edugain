@@ -49,6 +49,9 @@ invenio_edugain = "invenio_edugain:InvenioEdugain"
 [project.entry-points."invenio_base.apps"]
 invenio_edugain = "invenio_edugain:InvenioEdugain"
 
+[project.entry-points."invenio_base.blueprints"]
+invenio_edugain = "invenio_edugain.views:create_blueprint"
+
 [project.entry-points."invenio_celery.tasks"]
 invenio_edugain = "invenio_edugain.tasks"
 
