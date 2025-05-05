@@ -8,3 +8,7 @@
 """Configuration for invenio-edugain."""
 
 EDUGAIN_LOGIN_ENABLED = True
+
+EDUGAIN_ROUTES = {
+    "login-discover": "/login/discover",
+}
