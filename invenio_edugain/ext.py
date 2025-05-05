@@ -9,6 +9,8 @@
 
 from flask import Flask
 
+from . import config
+
 
 class InvenioEdugain:
     """invenio-edugain flask-extension."""
@@ -20,4 +22,11 @@ class InvenioEdugain:
 
     def init_app(self, app: Flask) -> None:
         """Flask application initialization."""
+        self.init_config(app)
         app.extensions["invenio-edugain"] = self
+
+    def init_config(self, app: Flask) -> None:
+        """Initialize configuration."""
+        for k in dir(config):
+            if k.startswith("EDUGAIN_"):
+                app.config.setdefault(k, getattr(config, k))
