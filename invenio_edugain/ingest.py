@@ -56,9 +56,9 @@ def from_mdstore(mds: MetadataStore) -> IdPDataImportItem:
         # chain with `mds.name(...)` as a fallback
         name_generator = chain(
             mds.mdui_uiinfo_display_name(idp_id),
-            mds.name(idp_id),
+            [name] if (name := mds.name(idp_id)) else [],
         )
-        displayname = next(name_generator)
+        displayname = next(name_generator, "")
         logo_url = pick_squarest_logo(mds, idp_id)
         settings = mds[idp_id]
         if idp_id in existing_idp_data:
