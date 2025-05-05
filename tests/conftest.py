@@ -14,6 +14,7 @@ from invenio_app.factory import create_app as invenio_create_app
 @pytest.fixture(scope="module")
 def app_config(app_config: dict):
     """Expand default app-config."""
+    app_config["THEME_FRONTPAGE"] = False
     return app_config
 
 
