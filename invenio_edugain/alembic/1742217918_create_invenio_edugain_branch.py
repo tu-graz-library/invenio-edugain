@@ -11,7 +11,7 @@
 revision = "1742217918"
 down_revision = None
 branch_labels = ("invenio_edugain",)
-depends_on = None
+depends_on = "dbdbc1b19cf2"
 
 
 def upgrade() -> None:
