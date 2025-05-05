@@ -18,6 +18,10 @@ charset = utf-8
 [*.py]
 indent_size = 4
 
+# HTML
+[*.html]
+indent_size = 2
+
 # github CI
 [.github/workflows/*.yml]
 indent_size = 2
