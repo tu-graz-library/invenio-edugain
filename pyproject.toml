@@ -43,6 +43,9 @@ opensearch2 = [
   "invenio-search[opensearch2]>=3.0.0,<4.0.0",
 ]
 
+[project.entry-points."invenio_assets.webpack"]
+invenio_edugain = "invenio_edugain.webpack:edugain"
+
 [project.entry-points."invenio_base.api_apps"]
 invenio_edugain = "invenio_edugain:InvenioEdugain"
 
