@@ -15,6 +15,19 @@ from sqlalchemy import select, true
 
 from .models import IdPData
 
+NS_PREFIX = {
+    "alg": "urn:oasis:names:tc:SAML:metadata:algsupport",
+    "ds": "http://www.w3.org/2000/09/xmldsig#",
+    "eidas": "http://eidas.europa.eu/saml-extensions",
+    "md": "urn:oasis:names:tc:SAML:2.0:metadata",
+    "mdattr": "urn:oasis:names:tc:SAML:metadata:attribute",
+    "mdui": "urn:oasis:names:tc:SAML:metadata:ui",
+    "remd": "http://refeds.org/metadata",
+    "saml2": "urn:oasis:names:tc:SAML:2.0:assertion",
+    "saml2p": "urn:oasis:names:tc:SAML:2.0:protocol",
+}
+"""Names for namespaces that SAML commonly uses."""
+
 
 # TODO: cache
 def get_idp_data_dict() -> dict:
