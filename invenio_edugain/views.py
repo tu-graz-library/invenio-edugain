@@ -7,9 +7,12 @@
 
 """invenio-edugain views."""
 
+from xml.etree import ElementTree as ET
+
 from flask import (
     Blueprint,
     Flask,
+    Response,
     abort,
     current_app,
     redirect,
@@ -17,7 +20,8 @@ from flask import (
     request,
 )
 from saml2.client import Saml2Client
-from saml2.config import SPConfig
+from saml2.config import Config, SPConfig
+from saml2.metadata import entity_descriptor
 from werkzeug.wrappers import Response as BaseResponse
 
 from .utils import NS_PREFIX, get_idp_data_dict
@@ -72,6 +76,21 @@ def authn_request() -> BaseResponse:
     return redirect(redirect_url, **redirect_kwargs)
 
 
+def sp_xml() -> Response:
+    """Show SAML xml-metadata of this service provider."""
+    config_dict = current_app.config["EDUGAIN_PYSAML2_CONFIG"]
+    config = Config()
+    config.load(config_dict)
+    ed = entity_descriptor(config)
+
+    # clean up xml-representation
+    ed_etree = ET.XML(ed.to_string(NS_PREFIX))
+    ET.indent(ed_etree)
+    xml_bytes = ET.tostring(ed_etree, xml_declaration=True)
+
+    return Response(xml_bytes, mimetype="application/xml")
+
+
 def create_blueprint(app: Flask) -> Blueprint:
     """Create blueprint for invenio-edugain."""
     routes = app.config["EDUGAIN_ROUTES"]
@@ -85,5 +104,6 @@ def create_blueprint(app: Flask) -> Blueprint:
 
     blueprint.add_url_rule(routes["login-discover"], view_func=login_discover)
     blueprint.add_url_rule(routes["authn-request"], view_func=authn_request)
+    blueprint.add_url_rule(routes["sp-xml"], view_func=sp_xml)
 
     return blueprint
