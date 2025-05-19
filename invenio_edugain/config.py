@@ -10,5 +10,9 @@
 EDUGAIN_LOGIN_ENABLED = True
 
 EDUGAIN_ROUTES = {
+    "authn-request": "/login/authn-request",
     "login-discover": "/login/discover",
 }
+
+# TODO: make configuration more convenient than writing the whole config-dict into this var
+EDUGAIN_PYSAML2_CONFIG: dict[str, str | list | dict] = {}
