@@ -12,6 +12,7 @@ EDUGAIN_LOGIN_ENABLED = True
 EDUGAIN_ROUTES = {
     "authn-request": "/login/authn-request",
     "login-discover": "/login/discover",
+    "sp-xml": "/sp/xml",
 }
 
 # TODO: make configuration more convenient than writing the whole config-dict into this var
