@@ -7,9 +7,24 @@
 
 """invenio-edugain views."""
 
-from flask import Blueprint, Flask, render_template
+from xml.etree import ElementTree as ET
 
-from .utils import get_idp_data_dict
+from flask import (
+    Blueprint,
+    Flask,
+    Response,
+    abort,
+    current_app,
+    redirect,
+    render_template,
+    request,
+)
+from saml2.client import Saml2Client
+from saml2.config import Config, SPConfig
+from saml2.metadata import entity_descriptor
+from werkzeug.wrappers import Response as BaseResponse
+
+from .utils import NS_PREFIX, get_idp_data_dict
 
 
 def login_discover() -> str:
@@ -18,6 +33,62 @@ def login_discover() -> str:
         "invenio_edugain/login_discovery.html",
         idp_data_dict=get_idp_data_dict(),
     )
+
+
+def authn_request() -> BaseResponse:
+    """Send an authorization-request to IdP depending on `request.args`.
+
+    request.args["id"] identifies the IdP to send the request to
+    request.args["next"] determines where to redirect to after response
+    """
+    # parse search params for entityid, next
+    entityid = request.args.get("id")
+    if entityid is None:
+        abort(400, description="Missing required parameter: id")
+    relay_state = request.args.get("next", "/")  # TODO: make default configurable
+
+    # pysaml2: create authn-request
+    config_dict = current_app.config["EDUGAIN_PYSAML2_CONFIG"]
+    config = SPConfig()
+    config.load(config_dict)
+    client = Saml2Client(config)
+    request_id, http_args = client.prepare_for_authenticate(
+        entityid=entityid,
+        relay_state=relay_state,
+        nsprefix=NS_PREFIX,
+    )
+
+    # create flask redirect from pysaml2
+    redirect_urls = [
+        header_value
+        for header_name, header_value in http_args["headers"]
+        if header_name == "Location"
+    ]
+    if len(redirect_urls) != 1:
+        # this shouldn't ever happen...
+        msg = "pysaml2 gave multiple redirect urls"
+        raise ValueError(msg)
+    redirect_url = redirect_urls[0]
+    redirect_kwargs = {}
+    if http_status_code := http_args.get("status"):
+        redirect_kwargs["code"] = http_status_code
+
+    return redirect(redirect_url, **redirect_kwargs)
+
+
+def sp_xml() -> Response:
+    """Show SAML xml-metadata of this service provider."""
+    config_dict = current_app.config["EDUGAIN_PYSAML2_CONFIG"]
+    config = Config()
+    config.load(config_dict)
+    ed = entity_descriptor(config)
+
+    # clean up xml-representation
+    ed_etree = ET.XML(ed.to_string(NS_PREFIX))
+    ET.indent(ed_etree)
+    xml_bytes = ET.tostring(ed_etree, xml_declaration=True)
+
+    return Response(xml_bytes, mimetype="application/xml")
 
 
 def create_blueprint(app: Flask) -> Blueprint:
@@ -32,5 +103,7 @@ def create_blueprint(app: Flask) -> Blueprint:
     )
 
     blueprint.add_url_rule(routes["login-discover"], view_func=login_discover)
+    blueprint.add_url_rule(routes["authn-request"], view_func=authn_request)
+    blueprint.add_url_rule(routes["sp-xml"], view_func=sp_xml)
 
     return blueprint
