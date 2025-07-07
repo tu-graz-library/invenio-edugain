@@ -10,6 +10,7 @@
 EDUGAIN_LOGIN_ENABLED = True
 
 EDUGAIN_ROUTES = {
+    "acs": "/acs",
     "authn-request": "/login/authn-request",
     "login-discover": "/login/discover",
     "sp-xml": "/sp/xml",
