@@ -19,12 +19,19 @@ from flask import (
     render_template,
     request,
 )
+from flask_security import login_user
 from saml2.client import Saml2Client
 from saml2.config import Config, SPConfig
 from saml2.metadata import entity_descriptor
 from werkzeug.wrappers import Response as BaseResponse
 
-from .utils import NS_PREFIX, get_idp_data_dict
+from .utils import (
+    NS_PREFIX,
+    AuthnInfo,
+    AuthnResponseError,
+    create_user,
+    get_idp_data_dict,
+)
 
 
 def login_discover() -> str:
@@ -91,6 +98,28 @@ def sp_xml() -> Response:
     return Response(xml_bytes, mimetype="application/xml")
 
 
+def acs() -> BaseResponse:
+    """Assertion consumer service."""  # noqa:D401
+    next_url = request.form.get("RelayState")
+    saml_response = request.form.get("SAMLResponse")
+    if saml_response is None:
+        msg = "POST contained no SAMLResponse"
+        raise AuthnResponseError(msg)
+
+    authn_info = AuthnInfo.from_saml_response(saml_response)
+    if authn_info.user is None:
+        # no user found in db, create one
+        authn_info.user = create_user(authn_info)
+
+    if not login_user(authn_info.user):
+        # user.active is False, hence wasn't logged in
+        msg = "User was blocked/deactivated"
+        raise AuthnResponseError(msg)
+    current_app.extensions["security"].datastore.commit()
+
+    return redirect(next_url or current_app.config["SECURITY_POST_LOGIN_VIEW"])
+
+
 def create_blueprint(app: Flask) -> Blueprint:
     """Create blueprint for invenio-edugain."""
     routes = app.config["EDUGAIN_ROUTES"]
@@ -102,7 +131,7 @@ def create_blueprint(app: Flask) -> Blueprint:
         url_prefix="/saml",
     )
 
-    blueprint.add_url_rule(routes["login-discover"], view_func=login_discover)
+    blueprint.add_url_rule(routes["acs"], methods=["POST"], view_func=acs)
     blueprint.add_url_rule(routes["authn-request"], view_func=authn_request)
     blueprint.add_url_rule(routes["sp-xml"], view_func=sp_xml)
 
