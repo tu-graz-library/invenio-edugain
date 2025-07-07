@@ -8,7 +8,7 @@
 """Utils for invenio-edugain."""
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from hashlib import sha256
 from typing import TYPE_CHECKING, Any, Self
 
@@ -212,7 +212,7 @@ def create_user(authn_info: AuthnInfo) -> User:
     )
     if form.validate():
         # see invenio_saml.invenio_accounts.utils:account_register
-        confirmed_at = datetime.now(timezone.utc)
+        confirmed_at = datetime.now(UTC)
         data = {
             **form.to_dict(),
             "confirmed_at": confirmed_at,
