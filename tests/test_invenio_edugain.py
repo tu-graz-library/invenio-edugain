@@ -10,6 +10,6 @@
 
 def test_version():
     """Test for existence of `__version__` attribute."""
-    from invenio_edugain import __version__
+    from invenio_edugain import __version__  # noqa: PLC0415
 
     assert __version__
