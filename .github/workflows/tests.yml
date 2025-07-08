@@ -26,6 +26,6 @@ jobs:
   python_tests:
     uses: inveniosoftware/workflows/.github/workflows/tests-python.yml@master
     with:
-      python-version: '["3.10", "3.12", "3.13"]'
+      python-version: '["3.11", "3.12", "3.13"]'
   javascript_tests:
     uses: inveniosoftware/workflows/.github/workflows/tests-js.yml@master
