@@ -10,17 +10,22 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
+from os import PathLike
+from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Any, Self
 
+import requests
+import validators
 from flask import current_app
 from flask_security.registerable import register_user
 from invenio_accounts.models import User, UserIdentity
 from invenio_db import db
 from invenio_oauthclient.utils import create_csrf_disabled_registrationform, fill_form
+from OpenSSL.crypto import FILETYPE_PEM, load_certificate
 from saml2 import BINDING_HTTP_POST
 from saml2.client import Saml2Client
-from saml2.config import SPConfig
-from saml2.mdstore import InMemoryMetaData
+from saml2.config import Config, SPConfig
+from saml2.mdstore import InMemoryMetaData, MetadataStore
 from sqlalchemy import select, true
 
 from .models import IdPData
@@ -55,6 +60,65 @@ def get_idp_data_dict() -> dict:
         }
         for idp_data in idps_data
     }
+
+
+def load_mdstore(
+    metadata_xml_location: PathLike | str,
+    cert_location: PathLike | str | None = None,
+    fingerprint_sha256: str | None = None,
+    *,
+    http_client_timeout: int = 30,
+) -> MetadataStore:
+    """Load a pysaml2 MetadataStore from given path/url.
+
+    When loading metadata from url, requires a certificate to check validity of metadata.
+    When loading that certificate from url, requires a fingerprint to check validity of certificate.
+    """
+    mds = MetadataStore(None, Config(), http_client_timeout=http_client_timeout)
+
+    if isinstance(metadata_xml_location, str) and validators.url(metadata_xml_location):
+        # load metadata from url: need cert, either via local file or remote fingerprint-checked cert
+        if cert_location is None:
+            msg = "must provide a certificate when loading metadata-xml from URL"
+            raise TypeError(msg)
+
+        if isinstance(cert_location, str) and validators.url(cert_location):
+            # load cert from url: download cert and check fingerprint
+            if fingerprint_sha256 is None:
+                msg = "must provide a fingerprint when loading certificate from URL"
+                raise TypeError(msg)
+
+            response = requests.get(cert_location, timeout=http_client_timeout)
+            response.raise_for_status()
+            cert_bytes = response.content
+
+            cert = load_certificate(FILETYPE_PEM, cert_bytes)
+            calculated_fingerprint = cert.digest("SHA256").decode()
+            if fingerprint_sha256 != calculated_fingerprint:
+                msg = "downloaded cert's fingerprint didn't match"
+                raise ValueError(msg)
+
+            # automatically deletes temp file on __exit__
+            with NamedTemporaryFile("wb", suffix=".pem") as temp_cert_buf:
+                temp_cert_buf.write(cert_bytes)
+                temp_cert_buf.flush()  # don't close yet, as OS might then delete the file...
+                mds.load(
+                    "remote",
+                    url=metadata_xml_location,
+                    check_validity=True,
+                    cert=temp_cert_buf.name,
+                )
+        else:
+            mds.load(
+                "remote",
+                url=metadata_xml_location,
+                check_validity=True,
+                cert=cert_location,
+            )
+    else:
+        mds.load("local", metadata_xml_location)
+
+    return mds
 
 
 class MetaDataFlaskSQL(InMemoryMetaData):
