@@ -7,21 +7,18 @@
 
 """Celery tasks for invenio-edugain."""
 
-import validators
 from celery import shared_task
-from saml2.config import Config
-from saml2.mdstore import MetadataStore
 
 from . import ingest
+from .utils import load_mdstore
 
 
 @shared_task
-def ingest_idp_data(file_or_url: str) -> None:
+def ingest_idp_data(
+    metadata_xml_location: str,
+    cert_location: str | None = None,
+    fingerprint_sha256: str | None = None,
+) -> None:
     """Ingest idp-data from given SAML metadata XML into db."""
-    mds = MetadataStore(None, Config())
-    if validators.url(file_or_url):
-        mds.load("remote", url=file_or_url)
-    else:
-        mds.load("local", file_or_url)
-
+    mds = load_mdstore(metadata_xml_location, cert_location, fingerprint_sha256)
     ingest.from_mdstore(mds)
