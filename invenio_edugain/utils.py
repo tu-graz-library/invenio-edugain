@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from hashlib import sha256
 from os import PathLike
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, TypeGuard
 
 import requests
 import validators
@@ -62,6 +62,12 @@ def get_idp_data_dict() -> dict:
     }
 
 
+def location_is_remote(location: PathLike | str) -> TypeGuard[str]:
+    """Check whether the given `location` is a local path or a remote URL."""
+    # NOTE: remote locations need be of type str, so the isinstance-check is crucial.
+    return isinstance(location, str) and validators.url(location)
+
+
 def load_mdstore(
     metadata_xml_location: PathLike | str,
     cert_location: PathLike | str | None = None,
@@ -76,47 +82,49 @@ def load_mdstore(
     """
     mds = MetadataStore(None, Config(), http_client_timeout=http_client_timeout)
 
-    if isinstance(metadata_xml_location, str) and validators.url(metadata_xml_location):
-        # load metadata from url: need cert, either via local file or remote fingerprint-checked cert
-        if cert_location is None:
-            msg = "must provide a certificate when loading metadata-xml from URL"
-            raise TypeError(msg)
-
-        if isinstance(cert_location, str) and validators.url(cert_location):
-            # load cert from url: download cert and check fingerprint
-            if fingerprint_sha256 is None:
-                msg = "must provide a fingerprint when loading certificate from URL"
-                raise TypeError(msg)
-
-            response = requests.get(cert_location, timeout=http_client_timeout)
-            response.raise_for_status()
-            cert_bytes = response.content
-
-            cert = load_certificate(FILETYPE_PEM, cert_bytes)
-            calculated_fingerprint = cert.digest("SHA256").decode()
-            if fingerprint_sha256 != calculated_fingerprint:
-                msg = "downloaded cert's fingerprint didn't match"
-                raise ValueError(msg)
-
-            # automatically deletes temp file on __exit__
-            with NamedTemporaryFile("wb", suffix=".pem") as temp_cert_buf:
-                temp_cert_buf.write(cert_bytes)
-                temp_cert_buf.flush()  # don't close yet, as OS might then delete the file...
-                mds.load(
-                    "remote",
-                    url=metadata_xml_location,
-                    check_validity=True,
-                    cert=temp_cert_buf.name,
-                )
-        else:
-            mds.load(
-                "remote",
-                url=metadata_xml_location,
-                check_validity=True,
-                cert=cert_location,
-            )
-    else:
+    if not location_is_remote(metadata_xml_location):
         mds.load("local", metadata_xml_location)
+        return mds
+
+    # load metadata from url: need cert, either via local cert-file or remote fingerprint-checked cert
+    if cert_location is None:
+        msg = "must provide a certificate when loading metadata-xml from URL"
+        raise TypeError(msg)
+
+    if not location_is_remote(cert_location):
+        mds.load(
+            "remote",
+            url=metadata_xml_location,
+            check_validity=True,
+            cert=cert_location,
+        )
+        return mds
+
+    # load cert from url: download cert and check fingerprint
+    if fingerprint_sha256 is None:
+        msg = "must provide a fingerprint when loading certificate from URL"
+        raise TypeError(msg)
+
+    response = requests.get(cert_location, timeout=http_client_timeout)
+    response.raise_for_status()
+    cert_bytes = response.content
+
+    cert = load_certificate(FILETYPE_PEM, cert_bytes)
+    calculated_fingerprint = cert.digest("SHA256").decode()
+    if fingerprint_sha256 != calculated_fingerprint:
+        msg = "downloaded cert's fingerprint didn't match"
+        raise ValueError(msg)
+
+    # mds.load requires `cert` to be a file-path, so write cert to a temporary file:
+    with NamedTemporaryFile("wb", suffix=".pem") as temp_cert_buf:
+        temp_cert_buf.write(cert_bytes)
+        temp_cert_buf.flush()  # flush instead of closing, as OS might delete closed file...
+        mds.load(
+            "remote",
+            url=metadata_xml_location,
+            check_validity=True,
+            cert=temp_cert_buf.name,
+        )
 
     return mds
 

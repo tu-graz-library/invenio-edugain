@@ -48,8 +48,11 @@ class IngestIdPDataArgsSchema(Schema):
     )
 
 
-class NOT_GIVEN:  # noqa: N801
-    """Sentinel distinct from `None`."""
+class ABSENT:
+    """Sentinel distinct from `None`.
+
+    Signifies that this argument was absent in function call.
+    """
 
 
 class IngestIdPDataJob(JobType):
@@ -66,39 +69,40 @@ class IngestIdPDataJob(JobType):
         cls,
         job_obj: Job,  # noqa: ARG003
         since: datetime | None = None,  # noqa: ARG003
-        metadata_xml_location: str | None | type[NOT_GIVEN] = NOT_GIVEN,
-        cert_location: str | None | type[NOT_GIVEN] = NOT_GIVEN,
-        fingerprint_sha256: str | None | type[NOT_GIVEN] = NOT_GIVEN,
+        metadata_xml_location: str | None | type[ABSENT] = ABSENT,
+        cert_location: str | None | type[ABSENT] = ABSENT,
+        fingerprint_sha256: str | None | type[ABSENT] = ABSENT,
         job_arg_schema: str | None = None,  # noqa: ARG003
     ) -> dict:
         """Generate arguments for task.
 
         Received arguments are `job_obj`, `since`, plus all fields in `arguments_schema`.
         """
-        # this is called for two different purposes:
+        # this is called for two completely different purposes:
         #   1. to generate a reference configuration to show on the jobs panel
         #      in this case, only `job_obj`, `since` are passed
-        #      (other args are set to NOT_GIVEN in this case)
+        #      (other args are ABSENT in this case)
         #   2. to calculate the arguments for executing the job
         #      in this case, all args are passed but may be `None`
-        #      (since all args are passed in this case, non take the default value NOT_GIVEN)
-        metadata_xml_location = (
-            metadata_xml_location
-            if metadata_xml_location is not NOT_GIVEN
-            else "https://mds.edugain.org/edugain-v2.xml"
-        )
-        cert_location = (
-            cert_location
-            if cert_location is not NOT_GIVEN
-            else "https://technical.edugain.org/mds-v2.cer"
-        )
-        fingerprint_sha256 = (
-            fingerprint_sha256
-            if fingerprint_sha256 is not NOT_GIVEN
-            else "BD:21:40:48:9A:9B:D7:40:44:DD:68:05:34:F7:78:88:A9:C1:3B:0A:C1:7C:4F:3A:03:6E:0F:EC:6D:89:99:95"
-        )
-        return {
+        #      (since all args are passed in this case, non take the default value ABSENT)
+        inputs = {
             "metadata_xml_location": metadata_xml_location,
             "cert_location": cert_location,
             "fingerprint_sha256": fingerprint_sha256,
         }
+        if all(value is not ABSENT for value in inputs.values()):
+            return inputs
+
+        if all(value is ABSENT for value in inputs.values()):
+            # this return is only displayed in the job's "configure and run" form as a reference configuration
+            reference_configuration = {
+                "metadata_xml_location": "https://my-local-edugain-federation-member.org/saml-metadata.xml",
+                "cert_location": "https://my-local-edugain-federation-member/metadata-signing.crt",
+                "fingerprint_sha256": "0A:1B:2C:3D:4E:5F:67:89:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF",
+            }
+            return reference_configuration  # noqa: RET504
+
+        msg = (
+            "must either be called by providing *all* input arguments or *none* of them"
+        )
+        raise ValueError(msg)
