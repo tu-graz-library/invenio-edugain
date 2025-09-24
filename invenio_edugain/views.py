@@ -59,7 +59,7 @@ def authn_request() -> BaseResponse:
     config = SPConfig()
     config.load(config_dict)
     client = Saml2Client(config)
-    request_id, http_args = client.prepare_for_authenticate(
+    _request_id, http_args = client.prepare_for_authenticate(
         entityid=entityid,
         relay_state=relay_state,
         nsprefix=NS_PREFIX,
