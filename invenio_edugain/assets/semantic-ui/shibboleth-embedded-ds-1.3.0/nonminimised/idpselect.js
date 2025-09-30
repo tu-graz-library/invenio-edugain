@@ -14,6 +14,16 @@ limitations under the License.
 // Changes by Graz University of Technology:
 //   - add legal header
 //   - format with prettier
+//   - add `import` statements
+//   - add `var` to some undeclared variables
+//   - avoid re-declaring variables
+//   - add comments to empty `catch` blocks
+
+/* global ActiveXObject */ // tell eslint that this a var from browser
+
+import { IdPSelectUIParms } from "./idpselect_config.js";
+import { IdPSelectLanguages } from "./idpselect_languages.js";
+import { TypeAheadControl } from "./typeahead.js";
 
 function IdPSelectUI() {
   //
@@ -356,7 +366,7 @@ function IdPSelectUI() {
     }
 
     var protocolOk = false;
-    for (var i = 0; i < allowableProtocols.length; i++) {
+    for (i = 0; i < allowableProtocols.length; i++) {
       var protocol = allowableProtocols[i];
       if (policy == protocol) {
         protocolOk = true;
@@ -567,14 +577,18 @@ function IdPSelectUI() {
 
     try {
       xhr = new XMLHttpRequest();
-    } catch (e) {}
+    } catch (e) {
+      // xhr is left =null, try other ways of creating requests next
+    }
     if (null == xhr) {
       //
       // EDS24. try to get 'Microsoft.XMLHTTP'
       //
       try {
         xhr = new ActiveXObject("Microsoft.XMLHTTP");
-      } catch (e) {}
+      } catch (e) {
+        // xhr is left =null, try other ways of creating requests next
+      }
     }
     if (null == xhr) {
       //
@@ -582,7 +596,9 @@ function IdPSelectUI() {
       //
       try {
         xhr = new ActiveXObject("MSXML2.XMLHTTP.3.0");
-      } catch (e) {}
+      } catch (e) {
+        // xhr is left =null, ran out of option, raise fatal error next
+      }
     }
     if (null == xhr) {
       fatal(getLocalizedMessage("fatal.noXMLHttpRequest"));
@@ -674,10 +690,10 @@ function IdPSelectUI() {
           if (bestFit === null) {
             bestFit = idp.Logos[i];
           } else {
-            me = Math.abs(
+            var me = Math.abs(
               bestRatio - Math.log(idp.Logos[i].width / idp.Logos[i].height)
             );
-            him = Math.abs(bestRatio - Math.log(bestFit.width / bestFit.height));
+            var him = Math.abs(bestRatio - Math.log(bestFit.width / bestFit.height));
             if (him > me) {
               bestFit = idp.Logos[i];
             }
@@ -872,7 +888,7 @@ function IdPSelectUI() {
 
     buildTextDiv(preferredIdPDIV, "idpPreferred.label");
 
-    for (var i = 0; i < maxPreferredIdPs && i < preferredIdPs.length; i++) {
+    for (i = 0; i < maxPreferredIdPs && i < preferredIdPs.length; i++) {
       if (preferredIdPs[i]) {
         var button = composePreferredIdPButton(preferredIdPs[i], i, atLeastOneImg);
         preferredIdPDIV.appendChild(button);
@@ -1097,7 +1113,7 @@ function IdPSelectUI() {
   var buildAutoDispatchPane = function (parent) {
     var inputName = "IdPSelectAutoDisp";
 
-    autoDispatchTile = buildDiv(undefined, "autoDispatchArea");
+    var autoDispatchTile = buildDiv(undefined, "autoDispatchArea");
     autoDispatchTile.setAttribute("role", "radiogroup");
     autoDispatchTile.setAttribute(
       "aria-label",
@@ -1121,7 +1137,7 @@ function IdPSelectUI() {
       setAutoDispatchCookie(0);
     };
 
-    div = buildDiv(undefined, "autoDispatchTile");
+    var div = buildDiv(undefined, "autoDispatchTile");
     div.appendChild(but);
     div.appendChild(document.createTextNode(getLocalizedMessage("autoFollow.never")));
     autoDispatchTile.appendChild(div);
@@ -1426,12 +1442,12 @@ function IdPSelectUI() {
     //
     userSelectedIdPs = retrieveUserSelectedIdPs();
     for (i = offset, j = 0; j < userSelectedIdPs.length && i < maxPreferredIdPs; j++) {
-      var cur_idp = getIdPFor(userSelectedIdPs[j]);
+      var curIdp = getIdPFor(userSelectedIdPs[j]);
       if (typeof idps.indexOf === "undefined") {
-        idps.push(cur_idp);
+        idps.push(curIdp);
         i++;
-      } else if (idps.indexOf(cur_idp) === -1) {
-        idps.push(cur_idp);
+      } else if (idps.indexOf(curIdp) === -1) {
+        idps.push(curIdp);
         i++;
       }
     }
@@ -1481,7 +1497,7 @@ function IdPSelectUI() {
     var expireDate;
     if (days > 0) {
       var now = new Date();
-      cookieTTL = days * 24 * 60 * 60 * 1000;
+      var cookieTTL = days * 24 * 60 * 60 * 1000;
       expireDate = new Date(now.getTime() + cookieTTL);
     } else {
       expireDate = new Date(0);
@@ -1501,7 +1517,7 @@ function IdPSelectUI() {
     */
 
   var getCookieCalled = function (name) {
-    var i, j;
+    var i;
     var cookies;
 
     cookies = document.cookie.split(";");
@@ -1574,7 +1590,7 @@ function IdPSelectUI() {
     var expireDate = null;
     if (samlIdPCookieTTL) {
       var now = new Date();
-      cookieTTL = samlIdPCookieTTL * 24 * 60 * 60 * 1000;
+      var cookieTTL = samlIdPCookieTTL * 24 * 60 * 60 * 1000;
       expireDate = new Date(now.getTime() + cookieTTL);
     }
 
@@ -1646,8 +1662,8 @@ function IdPSelectUI() {
     var i = 0;
 
     // Remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-    var base64test = /[^A-Za-z0-9\+\/\=]/g;
-    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+    var base64test = /[^A-Za-z0-9+/=]/g;
+    input = input.replace(/[^A-Za-z0-9+/=]/g, "");
 
     do {
       enc1 = base64chars.indexOf(input.charAt(i++));

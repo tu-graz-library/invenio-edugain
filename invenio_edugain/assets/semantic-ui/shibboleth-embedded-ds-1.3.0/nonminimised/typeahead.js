@@ -14,8 +14,9 @@ limitations under the License.
 // Changes by Graz University of Technology:
 //   - add legal header
 //   - format with prettier
+//   - add `export` statements
 
-function TypeAheadControl(
+export function TypeAheadControl(
   jsonObj,
   box,
   orig,

@@ -14,9 +14,11 @@ limitations under the License.
 // Changes by Graz University of Technology:
 //   - add legal header
 //   - format with prettier
+//   - add `export` qualifiers
+//   - fix escaping of regexp-strings
 
 /** @class IdP Selector UI */
-function IdPSelectUIParms() {
+export function IdPSelectUIParms() {
   //
   // Adjust the following to fit into your local configuration
   //
@@ -33,8 +35,8 @@ function IdPSelectUIParms() {
   //this.defaultReturn = "https://example.org/Shibboleth.sso/DS?SAMLDS=1&target=https://example.org/secure";
   this.defaultReturnIDParam = null;
   this.redirectAllow = [
-    "^https:\/\/example\.org\/Shibboleth\.sso\/Login.*$",
-    "^https:\/\/example\.com\/Shibboleth\.sso\/Login.*$",
+    "^https://example\\.org/Shibboleth\\.sso/Login.*$",
+    "^https://example\\.com/Shibboleth\\.sso/Login.*$",
   ];
   this.helpURL = "https://wiki.shibboleth.net/confluence/display/SHIB2/DSRoadmap";
   this.ie6Hack = null; // An array of structures to disable when drawing the pull down (needed to
