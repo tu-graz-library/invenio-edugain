@@ -14,9 +14,10 @@ limitations under the License.
 // Changes by Graz University of Technology:
 //   - add legal header
 //   - format with prettier
+//   - add `export` statement
 
 /** @class IdP Selector UI */
-function IdPSelectLanguages() {
+export function IdPSelectLanguages() {
   //
   // Globalization stuff
   //
