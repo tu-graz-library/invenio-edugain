@@ -18,14 +18,15 @@ limitations under the License.
 //   - add `var` to some undeclared variables
 //   - avoid re-declaring variables
 //   - add comments to empty `catch` blocks
+//   - export IdPSelectUI
+//   - remove instantiation of IdPSelectUI (now instantiated in another file)
 
 /* global ActiveXObject */ // tell eslint that this a var from browser
 
-import { IdPSelectUIParms } from "./idpselect_config.js";
 import { IdPSelectLanguages } from "./idpselect_languages.js";
 import { TypeAheadControl } from "./typeahead.js";
 
-function IdPSelectUI() {
+export function IdPSelectUI() {
   //
   // module locals
   //
@@ -1720,5 +1721,3 @@ function IdPSelectUI() {
     // Nothing
   };
 }
-
-new IdPSelectUI().draw(new IdPSelectUIParms());
