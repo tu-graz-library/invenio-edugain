@@ -18,3 +18,5 @@ EDUGAIN_ROUTES = {
 
 # TODO: make configuration more convenient than writing the whole config-dict into this var
 EDUGAIN_PYSAML2_CONFIG: dict[str, str | list | dict] = {}
+
+EDUGAIN_SHIBBOLETH_EDS_CONFIG: dict[str, str | list | dict] = {}

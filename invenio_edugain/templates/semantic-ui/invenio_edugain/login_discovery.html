@@ -28,7 +28,7 @@
           <div class="divider hidden"></div>
           <h3 class="ui login header">Find your institution</h3>{# TODO: translate #}
           <div class="ui divider"></div>
-          <div id="idpSelect">
+          <div id="idpSelect" data-shibboleth-eds-config='{{ shibboleth_eds_config | tojson }}'>
             <!-- content is provided by shibboleth-eds -->
           </div>
         </div>

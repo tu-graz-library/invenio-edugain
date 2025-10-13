@@ -20,6 +20,7 @@ from flask import (
     request,
 )
 from flask_security import login_user
+from invenio_i18n.proxies import current_i18n
 from saml2.client import Saml2Client
 from saml2.config import Config, SPConfig
 from saml2.metadata import entity_descriptor
@@ -35,10 +36,13 @@ from .utils import (
 
 
 def login_discover() -> str:
-    """Discovery page for chosing an IdP."""
+    """Discovery page for choosing an IdP."""
+    shibboleth_eds_config = current_app.config["EDUGAIN_SHIBBOLETH_EDS_CONFIG"]
+    shibboleth_eds_config["selectedLanguage"] = current_i18n.language
+
     return render_template(
         "invenio_edugain/login_discovery.html",
-        idp_data_dict=get_idp_data_dict(),
+        shibboleth_eds_config=shibboleth_eds_config,
     )
 
 
