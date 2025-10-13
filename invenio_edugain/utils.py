@@ -26,7 +26,7 @@ from saml2 import BINDING_HTTP_POST
 from saml2.client import Saml2Client
 from saml2.config import Config, SPConfig
 from saml2.mdstore import InMemoryMetaData, MetadataStore
-from sqlalchemy import select, true
+from sqlalchemy import true
 
 from .models import IdPData
 
@@ -45,21 +45,6 @@ NS_PREFIX = {
     "saml2p": "urn:oasis:names:tc:SAML:2.0:protocol",
 }
 """Names for namespaces that SAML commonly uses."""
-
-
-# TODO: cache
-def get_idp_data_dict() -> dict:
-    """Get from db a dict of the IdP-data of *enabled* idps."""
-    query = select(IdPData).where(IdPData.enabled == true())
-    idps_data: list[IdPData] = db.session.execute(query).scalars()
-
-    return {
-        idp_data.id: {
-            "displayname": idp_data.displayname,
-            "logo_url": idp_data.logo_url,
-        }
-        for idp_data in idps_data
-    }
 
 
 def location_is_remote(location: PathLike | str) -> TypeGuard[str]:

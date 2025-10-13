@@ -7,6 +7,8 @@
 
 """invenio-edugain views."""
 
+from collections import defaultdict
+from typing import TYPE_CHECKING
 from xml.etree import ElementTree as ET
 
 from flask import (
@@ -31,8 +33,10 @@ from .utils import (
     AuthnInfo,
     AuthnResponseError,
     create_user,
-    get_idp_data_dict,
 )
+
+if TYPE_CHECKING:
+    from saml2.mdstore import MetadataStore
 
 
 def login_discover() -> str:
@@ -44,6 +48,53 @@ def login_discover() -> str:
         "invenio_edugain/login_discovery.html",
         shibboleth_eds_config=shibboleth_eds_config,
     )
+
+
+def disco_feed() -> list:
+    """Return disco feed for use with shibboleth EDS."""
+    config_dict = current_app.config["EDUGAIN_PYSAML2_CONFIG"]
+    config = Config()
+    config.load(config_dict)
+    mds: MetadataStore = config.metadata
+
+    feed = []
+    idp_ids: list[str] = sorted(mds.identity_providers())
+    for idp_id in idp_ids:
+        # entry is one item in the feed
+        entry: dict[str, list | str] = {"entityID": idp_id}
+
+        names_by_lang = defaultdict(list)  # names ordered by relevance
+        uiinfos = list(mds.mdui_uiinfo(idp_id))
+        for uiinfo in uiinfos:
+            for dn in uiinfo.get("display_name", []):
+                names_by_lang[dn["lang"]].append(dn["text"])
+        org = mds[idp_id].get("organization", {})
+        for name_key in [
+            "organization_display_name",
+            "organization_name",
+            "organization_url",
+        ]:
+            for name_dict in org.get(name_key, []):
+                names_by_lang[name_dict["lang"]].append(name_dict["text"])
+
+        entry["DisplayNames"] = [
+            {"lang": lang, "value": names[0]} for lang, names in names_by_lang.items()
+        ]
+
+        entry["Keywords"] = [
+            {"lang": kw["lang"], "value": kw["text"]}
+            for uiinfo in uiinfos
+            for kw in uiinfo.get("keywords", [])
+        ]
+
+        entry["Logos"] = [
+            {"value": logo["text"], "height": logo["height"], "width": logo["width"]}
+            for uiinfo in uiinfos
+            for logo in uiinfo.get("logo", [])
+        ]
+        feed.append(entry)
+
+    return feed
 
 
 def authn_request() -> BaseResponse:
@@ -137,6 +188,7 @@ def create_blueprint(app: Flask) -> Blueprint:
 
     blueprint.add_url_rule(routes["acs"], methods=["POST"], view_func=acs)
     blueprint.add_url_rule(routes["authn-request"], view_func=authn_request)
+    blueprint.add_url_rule(routes["discofeed"], view_func=disco_feed)
     blueprint.add_url_rule(routes["sp-xml"], view_func=sp_xml)
 
     return blueprint
