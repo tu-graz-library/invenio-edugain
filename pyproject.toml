@@ -102,9 +102,13 @@ ignore = [
   "PERF203",
   "PLR0913",
   "S101",
+  "TC002",
   "TD002", "TD003",
   "TID252",
   "UP009",
+]
+fixable = [
+  "RUF022",  # unsorted __all__
 ]
 
 [tool.ruff.lint.per-file-ignores]

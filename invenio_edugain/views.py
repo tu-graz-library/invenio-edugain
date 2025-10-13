@@ -8,7 +8,6 @@
 """invenio-edugain views."""
 
 from collections import defaultdict
-from typing import TYPE_CHECKING
 from xml.etree import ElementTree as ET
 
 from flask import (
@@ -25,6 +24,7 @@ from flask_security import login_user
 from invenio_i18n.proxies import current_i18n
 from saml2.client import Saml2Client
 from saml2.config import Config, SPConfig
+from saml2.mdstore import MetadataStore
 from saml2.metadata import entity_descriptor
 from werkzeug.wrappers import Response as BaseResponse
 
@@ -34,9 +34,6 @@ from .utils import (
     AuthnResponseError,
     create_user,
 )
-
-if TYPE_CHECKING:
-    from saml2.mdstore import MetadataStore
 
 
 def login_discover() -> str:

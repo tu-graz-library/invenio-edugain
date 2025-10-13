@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from hashlib import sha256
 from os import PathLike
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, Any, Self, TypeGuard
+from typing import Any, Self, TypeGuard
 
 import requests
 import validators
@@ -26,12 +26,10 @@ from saml2 import BINDING_HTTP_POST
 from saml2.client import Saml2Client
 from saml2.config import Config, SPConfig
 from saml2.mdstore import InMemoryMetaData, MetadataStore
+from saml2.response import AuthnResponse
 from sqlalchemy import true
 
 from .models import IdPData
-
-if TYPE_CHECKING:
-    from saml2.response import AuthnResponse
 
 NS_PREFIX = {
     "alg": "urn:oasis:names:tc:SAML:metadata:algsupport",
