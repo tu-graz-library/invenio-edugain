@@ -6,4 +6,11 @@
 import { IdPSelectUI } from "@js/shibboleth_eds/idpselect.js";
 import { IdPSelectUIParms } from "@js/shibboleth_eds/idpselect_config.js";
 
-new IdPSelectUI().draw(new IdPSelectUIParms());
+const IdPSelectElement = document.getElementById("idpSelect");
+
+const backendEDSConfigText = IdPSelectElement?.dataset?.shibbolethEdsConfig || null;
+const backendEDSConfig = backendEDSConfigText ? JSON.parse(backendEDSConfigText) : {};
+const defaultEDSConfig = new IdPSelectUIParms();
+const mergedEDSConfig = { ...defaultEDSConfig, ...backendEDSConfig };
+
+new IdPSelectUI().draw(mergedEDSConfig);
