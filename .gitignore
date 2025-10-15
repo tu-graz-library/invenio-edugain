@@ -46,6 +46,8 @@ pip-delete-this-directory.txt
 # node modules
 **/*/node_modules
 node_modules
+package.json
+package-lock.json
 
 # PyBuilder
 target/
