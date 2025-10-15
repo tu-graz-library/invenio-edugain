@@ -253,7 +253,7 @@ def create_user(authn_info: AuthnInfo) -> User:
     user_dict = {
         "email": authn_info.emails[0],
         "profile": {
-            "affiliations": "\n".join(authn_info.affiliations),
+            "affiliations": ";".join(authn_info.affiliations),
             "full_name": authn_info.full_name,
             "username": authn_info.username,
         },
