@@ -158,9 +158,13 @@ def sp_xml() -> Response:
     # clean up xml-representation
     ed_etree = ET.XML(ed.to_string(NS_PREFIX))
     ET.indent(ed_etree)
-    xml_bytes = ET.tostring(ed_etree, xml_declaration=True)
+    xml_bytes = ET.tostring(ed_etree, xml_declaration=True, encoding="utf-8")
 
-    return Response(xml_bytes, mimetype="application/xml")
+    return Response(
+        xml_bytes,
+        content_type="application/xml; charset=utf-8",
+        mimetype="application/xml",
+    )
 
 
 def acs() -> BaseResponse:
