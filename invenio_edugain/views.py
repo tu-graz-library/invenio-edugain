@@ -111,10 +111,23 @@ def authn_request() -> BaseResponse:
     config = SPConfig()
     config.load(config_dict)
     client = Saml2Client(config)
+
+    # multiple ACS URLs may be configured for `client` (e.g. test-, prod-server)
+    # find the ACS URL corresponding to the request's host
+    host_url = request.host_url
+    assertion_consumer_service_url = None
+    for url in client.service_urls():
+        if url.startswith(host_url):
+            assertion_consumer_service_url = url
+            break
+    else:
+        abort(400, description="No ACS configured for this host")
+
     _request_id, http_args = client.prepare_for_authenticate(
         entityid=entityid,
         relay_state=relay_state,
         nsprefix=NS_PREFIX,
+        assertion_consumer_service_url=assertion_consumer_service_url,
     )
 
     # create flask redirect from pysaml2
