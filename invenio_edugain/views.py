@@ -101,7 +101,7 @@ def authn_request() -> BaseResponse:
     request.args["next"] determines where to redirect to after response
     """
     # parse search params for entityid, next
-    entityid = request.args.get("id")
+    entityid = request.args.get("entityID")
     if entityid is None:
         abort(400, description="Missing required parameter: id")
     relay_state = request.args.get("next", "/")  # TODO: make default configurable
