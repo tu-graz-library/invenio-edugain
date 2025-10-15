@@ -200,9 +200,31 @@ def create_blueprint(app: Flask) -> Blueprint:
         url_prefix="/saml",
     )
 
+    # note that app-entrypoints are loaded before blueprint-entrypoints, so this exists
+    talisman = app.extensions.get("invenio-app", None).talisman
+    default_csp = talisman.content_security_policy
+
+    # this is a decorator for views that sets their Content-Security-Policy
+    allow_imgsrc_csp = talisman(
+        content_security_policy=default_csp | {"img-src": "*"},
+    )
+    # apply decorator (note that @decorator syntax is just syntactic sugar for calling the func)
+    match app.config.get("EDUGAIN_ALLOW_IMGSRC_CSP"):
+        case True:
+            discover_view = allow_imgsrc_csp(login_discover)
+        case False:
+            discover_view = login_discover
+        case _:
+            msg = (
+                "Please decide whether you allow 'imgsrc: *' Content-Security-Policy for discovery page, "
+                "then set EDUGAIN_ALLOW_IMGSRC_CSP accordingly"
+            )
+            raise ValueError(msg)
+
     blueprint.add_url_rule(routes["acs"], methods=["POST"], view_func=acs)
     blueprint.add_url_rule(routes["authn-request"], view_func=authn_request)
     blueprint.add_url_rule(routes["discofeed"], view_func=disco_feed)
+    blueprint.add_url_rule(routes["login-discover"], view_func=discover_view)
     blueprint.add_url_rule(routes["sp-xml"], view_func=sp_xml)
 
     return blueprint
