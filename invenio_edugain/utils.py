@@ -144,7 +144,7 @@ class AuthnInfo:
     """Parsed authentication info."""
 
     id_by_method: dict[str, str | None]  # NOTE: ids hashed, preferred methods first
-    additional_attributes: list[str]  # attributes the IdP sent despite us not asking
+    additional_attributes: dict[str, list[str]]
     affiliations: list[str]
     emails: list[str]  # potentially empty list
     full_name: str  # potentially empty string
@@ -203,7 +203,6 @@ class AuthnInfo:
         affiliations = ava.pop("eduPersonScopedAffiliation", [])
         displaynames = ava.pop("displayName", [])
         emails = ava.pop("mail", [])
-        emails.extend(ava["email"])  # TODO: remove
         given_names = ava.pop("givenName", [])
         family_names = ava.pop("sn", [])
 
@@ -253,7 +252,7 @@ def create_user(authn_info: AuthnInfo) -> User:
     user_dict = {
         "email": authn_info.emails[0],
         "profile": {
-            "affiliations": "\n".join(authn_info.affiliations),
+            "affiliations": ";".join(authn_info.affiliations),
             "full_name": authn_info.full_name,
             "username": authn_info.username,
         },

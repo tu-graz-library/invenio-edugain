@@ -8,6 +8,7 @@
 """invenio-edugain views."""
 
 from collections import defaultdict
+from secrets import token_hex
 from xml.etree import ElementTree as ET
 
 from flask import (
@@ -101,7 +102,7 @@ def authn_request() -> BaseResponse:
     request.args["next"] determines where to redirect to after response
     """
     # parse search params for entityid, next
-    entityid = request.args.get("id")
+    entityid = request.args.get("entityID")
     if entityid is None:
         abort(400, description="Missing required parameter: id")
     relay_state = request.args.get("next", "/")  # TODO: make default configurable
@@ -111,10 +112,23 @@ def authn_request() -> BaseResponse:
     config = SPConfig()
     config.load(config_dict)
     client = Saml2Client(config)
+
+    # multiple ACS URLs may be configured for `client` (e.g. test-, prod-server)
+    # find the ACS URL corresponding to the request's host
+    host_url = request.host_url
+    assertion_consumer_service_url = None
+    for url in client.service_urls():
+        if url.startswith(host_url):
+            assertion_consumer_service_url = url
+            break
+    else:
+        abort(400, description="No ACS configured for this host")
+
     _request_id, http_args = client.prepare_for_authenticate(
         entityid=entityid,
         relay_state=relay_state,
         nsprefix=NS_PREFIX,
+        assertion_consumer_service_url=assertion_consumer_service_url,
     )
 
     # create flask redirect from pysaml2
@@ -145,9 +159,13 @@ def sp_xml() -> Response:
     # clean up xml-representation
     ed_etree = ET.XML(ed.to_string(NS_PREFIX))
     ET.indent(ed_etree)
-    xml_bytes = ET.tostring(ed_etree, xml_declaration=True)
+    xml_bytes = ET.tostring(ed_etree, xml_declaration=True, encoding="utf-8")
 
-    return Response(xml_bytes, mimetype="application/xml")
+    return Response(
+        xml_bytes,
+        content_type="application/xml; charset=utf-8",
+        mimetype="application/xml",
+    )
 
 
 def acs() -> BaseResponse:
@@ -161,6 +179,10 @@ def acs() -> BaseResponse:
     authn_info = AuthnInfo.from_saml_response(saml_response)
     if authn_info.user is None:
         # no user found in db, create one
+        # to prevent name collisions of users with same name, use random username instead
+        # we never show username to other users anyway...
+        # 16 bytes means chance of collisions is virtually 0 up to about 10**15 users
+        authn_info.username = "user-" + token_hex(nbytes=16)
         authn_info.user = create_user(authn_info)
 
     if not login_user(authn_info.user):
@@ -183,9 +205,31 @@ def create_blueprint(app: Flask) -> Blueprint:
         url_prefix="/saml",
     )
 
+    # note that app-entrypoints are loaded before blueprint-entrypoints, so this exists
+    talisman = app.extensions.get("invenio-app", None).talisman
+    default_csp = talisman.content_security_policy
+
+    # this is a decorator for views that sets their Content-Security-Policy
+    allow_imgsrc_csp = talisman(
+        content_security_policy=default_csp | {"img-src": "*"},
+    )
+    # apply decorator (note that @decorator syntax is just syntactic sugar for calling the func)
+    match app.config.get("EDUGAIN_ALLOW_IMGSRC_CSP"):
+        case True:
+            discover_view = allow_imgsrc_csp(login_discover)
+        case False:
+            discover_view = login_discover
+        case _:
+            msg = (
+                "Please decide whether you allow 'imgsrc: *' Content-Security-Policy for discovery page, "
+                "then set EDUGAIN_ALLOW_IMGSRC_CSP accordingly"
+            )
+            raise ValueError(msg)
+
     blueprint.add_url_rule(routes["acs"], methods=["POST"], view_func=acs)
     blueprint.add_url_rule(routes["authn-request"], view_func=authn_request)
     blueprint.add_url_rule(routes["discofeed"], view_func=disco_feed)
+    blueprint.add_url_rule(routes["login-discover"], view_func=discover_view)
     blueprint.add_url_rule(routes["sp-xml"], view_func=sp_xml)
 
     return blueprint

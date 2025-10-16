@@ -7,6 +7,15 @@
 
 """Configuration for invenio-edugain."""
 
+EDUGAIN_ALLOW_IMGSRC_CSP: bool | None = None
+"""Whether to allow dico-page to set the `imgsrc: *` content-security-policy.
+
+NOTE: this potential CSP change only affects discovery-page
+Since logos are hosted on their home-organization, this is necessary to load logo-imgs on discovery-page.
+Since changes to CSP are security-relevant, we won't change it without this opt-in.
+Since most people will want this, the default `None` raises an error.
+"""
+
 EDUGAIN_LOGIN_ENABLED = True
 
 EDUGAIN_ROUTES = {
