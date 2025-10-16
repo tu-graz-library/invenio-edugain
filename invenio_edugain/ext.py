@@ -31,12 +31,16 @@ class InvenioEdugain:
             if k.startswith("EDUGAIN_"):
                 app.config.setdefault(k, getattr(config, k))
 
+        if not app.config["EDUGAIN_PYSAML2_CONFIG"]:
+            app.config["EDUGAIN_PYSAML2_CONFIG"] = {}
         pysaml2_config = app.config["EDUGAIN_PYSAML2_CONFIG"]
         if signing_key := app.config.get("EDUGAIN_SIGNING_KEY"):
             pysaml2_config["key_file"] = signing_key
         if signing_cert := app.config.get("EDUGAIN_SIGNING_CRT"):
             pysaml2_config["cert_file"] = signing_cert
 
+        if not pysaml2_config.get("encryption_keypairs"):
+            pysaml2_config["encryption_keypairs"] = {}
         encryption_config = pysaml2_config["encryption_keypairs"]
         if encryption_key := app.config.get("EDUGAIN_ENCRYPTION_KEY"):
             encryption_config["key_file"] = encryption_key
