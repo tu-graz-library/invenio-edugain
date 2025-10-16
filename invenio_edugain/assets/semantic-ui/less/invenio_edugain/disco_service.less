@@ -1,0 +1,272 @@
+// Copyright (C) 2025 Graz University of Technology.
+//
+// invenio-edugain is free software; you can redistribute it and/or modify it
+// under the terms of the MIT License; see LICENSE file for more details.
+
+@element: "site";
+@type: "global";
+
+@import "../../theme.config";
+@import "~semantic-ui-less/semantic.less";  // base semantic-ui as less
+
+/* Originally copied from shibboleth-eds's idpselect.css
+
+This is made to mirror semantic-ui look.
+The HTML-structure of these elements is fixed (namely it's however shibboleth-eds.js structures it)
+and its structure is different from what semantic-ui needs,
+so semantic-ui classes can't be used directly.
+*/
+
+
+/*
+****************************
+*** idpSelectIdPSelector ***
+****************************
+
+  this is root of the HTML element tree
+  direct children of top level are:
+  - idpSelectPreferredIdPTile
+    which shows previousley selected IdPs
+  - idpSelectIdPEntryTile
+    which contains the search-as-you-type dropdown
+    (only shown when user selected this input-method)
+  - idpSelectIdPListTile
+    which contains the static list of all available IdPs
+    (only shown when user selected the *choose from a list* input-method)
+*/
+#idpSelectIdPSelector
+{
+    width: 600px;  // same as semantic-ui's accordion, which determines size on main login page
+}
+
+
+/*
+**********************************************
+*** idpSelectPreferredIdPTile and children ***
+**********************************************
+
+HTML element tree:
+  div #idpSelectPreferredIdPTile
+    div.IdPSelectTextDiv  // contains section label ("Use a suggested selection:" in en)
+      // NOTE: this class is used for all text in this disco-service
+    div.IdPSelectPreferredIdPButton  // from 0 up to 3, depending on user's previously selected IdPs
+      a
+        div.IdPSelectPreferredIdPImg
+          img.IdPSelectIdPImg  // src is logo of corresponding IdP
+        div.IdPSelectTextDiv  // contains display name of corresponding IdP
+          // NOTE: this class is used for all text in this disco-service
+*/
+#idpSelectPreferredIdPTile > div.IdPSelectTextDiv {
+    /* like semantic-ui <h4:first-child> */
+    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-size: 1.071rem;
+    font-weight: 700;
+    line-height: 1.2857em;
+    margin: 0 0 1rem 0;
+    padding: 0;
+    text-align: left;
+}
+div.IdPSelectPreferredIdPButton div.IdPSelectTextDiv {
+    display: inline-block;
+    text-align: left;
+    width: 100%;
+
+    &:hover{
+        text-decoration: underline;
+    }
+}
+.IdPSelectPreferredIdPButton {
+    float: left;
+    padding: 0 1rem 0 1rem;
+    width: 33.33%;
+
+    &:last-child {
+        // semantic-ui's margin-top for the following <h4>-styled div
+        // should only exist if at least one .IdPSelectPreferredIdPButton exists, hence added here
+        margin-bottom: calc(2rem - .14285em);
+    }
+}
+
+
+/*
+******************************************
+*** idpSelectIdPEntryTile and children ***
+******************************************
+
+HTML element tree:
+  div #idpSelectIdPEntryTile
+    form
+      label
+        div.IdPSelectTextDiv
+          // NOTE: this class is used for all text in this disco-service
+      input #idpSelectInput
+      input #idpSelectSelectButton
+    a.IdPSelectDropDownToggle  // switch to `pick from a list` input mode
+    a.IdPSelectHelpButton  // help button
+  div.IdPSelectDropDown  // at very end of <body>, javascript sets x,y s.t. it appears below #idpSelectInput
+    li #IdPSelectOption0
+    li #IdPSelectOption1
+    li #IdPSelectOption...
+    // can configure how many appear here
+    // currently hovered element has class .IdPSelectCurrent
+*/
+#idpSelectIdPEntryTile div.IdPSelectTextDiv {
+    display: inline-block;
+    text-align: left;
+    width: 100%;
+
+    /* like semantic-ui <h4:first-child> */
+    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-size: 1.071rem;
+    font-weight: 700;
+    line-height: 1.2857em;
+    margin: 0 0 1rem 0;
+    padding: 0;
+    text-align: left;
+}
+#idpSelectIdPEntryTile {
+    // for relative sizing of below elements
+    font-size: 14px;
+    text-align: left;
+}
+#idpSelectInput {
+    background: none transparent !important;
+    border-radius: 0;
+    border: 1px solid rgba(34, 36, 38, 0.15);
+    box-shadow: none !important;  // TODO: this or below?
+    box-shadow: none;
+    box-sizing: inherit;
+    color: rgba(0, 0, 0, 0.87);
+    cursor: text;
+    display: inline-block;
+    font-family: "Source Sans Pro";
+    font-size: 1em;
+    left: 0px;
+    line-height: 17px;
+    margin-right: 1em;
+    min-height: 2.71428571em;
+    min-width: 0em;
+    outline: 0;
+    outline: none;
+    padding: 0.67857143em 1em 0.67857143em 1em;
+    position: relative;
+    text-align: left;
+    top: 0em;
+    white-space: normal;
+    width: calc(80% - 1em);
+    word-wrap: break-word;
+    z-index: 2;
+    &:hover, &:focus {
+        border-color: rgba(34, 36, 38, 0.35);
+    };
+}
+#idpSelectSelectButton {
+    margin: 0;
+    width: 20%;
+
+    background-color: rgb(224, 225, 226);
+    background: #e0e1e2 none;
+    border: none;
+    border-radius: .28571429rem;
+    box-shadow: 0 0 0 1px transparent inset,0 0 0 0 rgba(34,36,38,.15) inset;
+    box-sizing: inherit;
+    color: rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    display: inline-block;
+    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1em;
+    min-height: 1em;
+    outline: 0;
+    overflow: visible;
+    padding: .78571429em 1.5em .78571429em;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: none;
+    text-transform: none;
+    transition: opacity .1s ease,background-color .1s ease,color .1s ease,box-shadow .1s ease,background .1s ease;
+    user-select: none;
+    vertical-align: middle;
+
+    &:hover {
+        background-color: #000;
+        background-image: none;
+        color: #fff;
+        font-weight: bold;
+        transition: opacity 0.1s ease, background-color 0.1s ease, color 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+    }
+}
+.IdPSelectDropDownToggle {
+    display: inline-block;
+    text-align: left;
+    width: 100%;
+}
+.IdPSelectHelpButton {
+    display: none;
+}
+.IdPSelectDropDown {
+    border: 1px solid;
+    border-color: rgba(34, 36, 38, 0.35);
+    border-top: 0;
+    list-style: none;
+    margin: 0 0 0 1px;
+    padding: 0;
+    position: absolute;
+    z-index: 6;
+}
+.IdPSelectDropDown li {
+    background-color: white;
+    cursor: default;
+    padding: 0 1em;  // set to equal input as to line up with it
+}
+ul.IdPSelectDropDown li.IdPSelectCurrent {
+    background-color: #3366cc;
+    color: white;
+}
+
+
+/*
+*****************************************
+*** idpSelectIdPListTile and children ***
+*****************************************
+
+HTML element tree:
+  #idpSelectIdPListTile
+    form
+      label
+        div.IdPSelectTextDiv
+      select #idpSelectSelector
+        option  // 1 per IdP
+      input #idpSelectListButton  // button
+    a.IdPSelectDropDownToggle  // switch to `specify the site` input mode
+    a.IdPSelectHelpButton  // help button
+*/
+#idpSelectIdPListTile {
+  font-size: 14px;
+}
+div.IdPSelectTextDiv {
+    display: inline-block;
+    text-align: left;
+    width: 100%;
+
+    /* like semantic-ui <h4:first-child> */
+    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-size: 1.071rem;
+    font-weight: 700;
+    line-height: 1.2857em;
+    margin: 0 0 1rem 0;
+    padding: 0;
+    text-align: left;
+}
+#idpSelectSelector {
+    #idpSelectInput();
+    border-radius: 0;
+}
+#idpSelectSelector option {
+    border-radius: 0;
+}
+#idpSelectListButton {
+    #idpSelectSelectButton();
+}
