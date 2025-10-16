@@ -29,6 +29,7 @@ edugain = WebpackThemeBundle(
             "devDependencies": {},
             "entry": {
                 "invenio-edugain-discovery": "./js/invenio_edugain/discovery.js",
+                "invenio-edugain-eds-less": "./less/invenio_edugain/disco_service.less",
             },
             "peerDependencies": {},
         },
