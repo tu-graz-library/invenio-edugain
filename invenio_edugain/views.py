@@ -8,6 +8,7 @@
 """invenio-edugain views."""
 
 from collections import defaultdict
+from secrets import token_hex
 from xml.etree import ElementTree as ET
 
 from flask import (
@@ -178,6 +179,10 @@ def acs() -> BaseResponse:
     authn_info = AuthnInfo.from_saml_response(saml_response)
     if authn_info.user is None:
         # no user found in db, create one
+        # to prevent name collisions of users with same name, use random username instead
+        # we never show username to other users anyway...
+        # 16 bytes means chance of collisions is virtually 0 up to about 10**15 users
+        authn_info.username = "user-" + token_hex(nbytes=16)
         authn_info.user = create_user(authn_info)
 
     if not login_user(authn_info.user):
