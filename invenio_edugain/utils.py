@@ -203,7 +203,6 @@ class AuthnInfo:
         affiliations = ava.pop("eduPersonScopedAffiliation", [])
         displaynames = ava.pop("displayName", [])
         emails = ava.pop("mail", [])
-        emails.extend(ava["email"])  # TODO: remove
         given_names = ava.pop("givenName", [])
         family_names = ava.pop("sn", [])
 
