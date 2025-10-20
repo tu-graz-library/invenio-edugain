@@ -15,6 +15,7 @@ from invenio_app.factory import create_app as invenio_create_app
 def app_config(app_config: dict):
     """Expand default app-config."""
     app_config["THEME_FRONTPAGE"] = False
+    app_config["EDUGAIN_ALLOW_IMGSRC_CSP"] = True
     return app_config
 
 
