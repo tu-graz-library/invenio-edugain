@@ -7,6 +7,7 @@
 
 """Utils to build configurations for use with pysaml2 and shibboleth-eds."""
 
+from .pysaml2 import build_pysaml2_config
 from .pysaml2_core import (
     Pysaml2ConfigCore,
     Pysaml2ConfigCoreContacts,
@@ -26,5 +27,6 @@ __all__ = (
     "Pysaml2ConfigCoreOrganization",
     "Pysaml2ConfigCoreProvidedService",
     "Pysaml2ConfigCoreUIInfo",
+    "build_pysaml2_config",
     "build_shibboleth_eds_config",
 )
