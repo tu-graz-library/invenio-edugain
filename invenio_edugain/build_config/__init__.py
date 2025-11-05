@@ -7,8 +7,24 @@
 
 """Utils to build configurations for use with pysaml2 and shibboleth-eds."""
 
+from .pysaml2_core import (
+    Pysaml2ConfigCore,
+    Pysaml2ConfigCoreContacts,
+    Pysaml2ConfigCoreCryptographicCredentials,
+    Pysaml2ConfigCoreEntityCategories,
+    Pysaml2ConfigCoreOrganization,
+    Pysaml2ConfigCoreProvidedService,
+    Pysaml2ConfigCoreUIInfo,
+)
 from .shibboleth import build_shibboleth_eds_config
 
 __all__ = (
+    "Pysaml2ConfigCore",
+    "Pysaml2ConfigCoreContacts",
+    "Pysaml2ConfigCoreCryptographicCredentials",
+    "Pysaml2ConfigCoreEntityCategories",
+    "Pysaml2ConfigCoreOrganization",
+    "Pysaml2ConfigCoreProvidedService",
+    "Pysaml2ConfigCoreUIInfo",
     "build_shibboleth_eds_config",
 )
