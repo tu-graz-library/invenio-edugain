@@ -16,6 +16,15 @@ def app_config(app_config: dict):
     """Expand default app-config."""
     app_config["THEME_FRONTPAGE"] = False
     app_config["EDUGAIN_ALLOW_IMGSRC_CSP"] = True
+
+    # automatic pysaml2-config building fails on app startup unless given a bunch of vars
+    # one such necessary var is a path to an existing file, which is hard to emulate
+    # disable instead
+    app_config["EDUGAIN_PYSAML2_CONFIG_BUILDING_ENABLED"] = False
+
+    # shibboleth-eds config is simpler and should be buildable anyway...
+    app_config["EDUGAIN_SHIBBOLETH_EDS_CONFIG_BUILDING_ENABLED"] = True
+
     return app_config
 
 

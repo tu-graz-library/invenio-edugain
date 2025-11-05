@@ -10,6 +10,11 @@
 from flask import Flask
 
 from . import config
+from .build_config import (
+    Pysaml2ConfigCore,
+    build_pysaml2_config,
+    build_shibboleth_eds_config,
+)
 
 
 class InvenioEdugain:
@@ -31,18 +36,39 @@ class InvenioEdugain:
             if k.startswith("EDUGAIN_"):
                 app.config.setdefault(k, getattr(config, k))
 
-        if not app.config["EDUGAIN_PYSAML2_CONFIG"]:
-            app.config["EDUGAIN_PYSAML2_CONFIG"] = {}
-        pysaml2_config = app.config["EDUGAIN_PYSAML2_CONFIG"]
-        if signing_key := app.config.get("EDUGAIN_SIGNING_KEY"):
-            pysaml2_config["key_file"] = signing_key
-        if signing_cert := app.config.get("EDUGAIN_SIGNING_CRT"):
-            pysaml2_config["cert_file"] = signing_cert
 
-        if not pysaml2_config.get("encryption_keypairs"):
-            pysaml2_config["encryption_keypairs"] = {}
-        encryption_config = pysaml2_config["encryption_keypairs"]
-        if encryption_key := app.config.get("EDUGAIN_ENCRYPTION_KEY"):
-            encryption_config["key_file"] = encryption_key
-        if encryption_cert := app.config.get("EDUGAIN_ENCRYPTION_CRT"):
-            encryption_config["cert_file"] = encryption_cert
+def finalize_app(app: Flask) -> None:
+    """Finalize app."""
+    setup_configuration(app)
+
+
+def setup_configuration(app: Flask) -> None:
+    """Automatic setup of configuration (insofar enabled)."""
+    if app.config.get("EDUGAIN_PYSAML2_CONFIG_BUILDING_ENABLED", True):
+        try:
+            config_core = Pysaml2ConfigCore(flask_config=app.config)
+            pysaml2_config = build_pysaml2_config(app=app, config_core=config_core)
+        except Exception as exception:
+            exception.add_note(
+                "when automatically building pysaml2 config on startup\n"
+                "automatic building can be turned off via `EDUGAIN_PYSAML2_CONFIG_BUILDING_ENABLED`.",
+            )
+            raise
+        app.config["EDUGAIN_PYSAML2_CONFIG"] = pysaml2_config
+
+    if app.config.get("EDUGAIN_SHIBBOLETH_EDS_CONFIG_BUILDING_ENABLED", True):
+        shibboleth_kwargs = (
+            app.config.get("EDUGAIN_SHIBBOLETH_EDS_CONFIG_KWARGS", {}) or {}
+        )
+        try:
+            shibboleth_eds_config = build_shibboleth_eds_config(
+                app,
+                **shibboleth_kwargs,
+            )
+        except Exception as exception:
+            exception.add_note(
+                "when automatically building shibboleth-eds config on startup\n"
+                "automatic building can be turned off via `EDUGAIN_SHIBBOLETH_EDS_CONFIG_BUILDING_ENABLED`.",
+            )
+            raise
+        app.config["EDUGAIN_SHIBBOLETH_EDS_CONFIG"] = shibboleth_eds_config
