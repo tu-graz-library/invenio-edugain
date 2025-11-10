@@ -17,25 +17,28 @@ from saml2.xmldsig import DIGEST_SHA256, SIG_RSA_SHA256
 from .pysaml2_core import Pysaml2ConfigCore
 from .utils import url_for_server
 
-type TupleJSON = (
+type JSONplusTuples = (
     str
     | int
     | float
     | bool
     | None
-    | dict[str, TupleJSON]
-    | list[TupleJSON]
-    | tuple[TupleJSON, ...]
-)  # like JSON, except its values may also be tuples
+    | dict[str, JSONplusTuples]
+    | list[JSONplusTuples]
+    | tuple[JSONplusTuples, ...]  # unlike JSON, this also contains tuples
+)
+"""JSON extended by tuples, for typing pysaml2 config (which includes tuples).
+
+The inclusion of tuples was considered different enough to introduce this new type."""
 
 
 def build_pysaml2_config(
     app: Flask,
     config_core: Pysaml2ConfigCore,
-) -> dict[str, TupleJSON]:
+) -> dict[str, JSONplusTuples]:
     """Build configuration for use with pysaml2."""
     # contacts
-    contacts: list[TupleJSON] = [
+    contacts: list[JSONplusTuples] = [
         {
             "email_address": [
                 f"mailto:{config_core.contact.technical_support_email.normalized}",
@@ -66,7 +69,7 @@ def build_pysaml2_config(
         entity_categories.append(RESEARCH_AND_SCHOLARSHIP)
 
     # organization
-    organization: dict[str, TupleJSON] = {}
+    organization: dict[str, JSONplusTuples] = {}
     organization["name"] = [
         (name, lang_code) for lang_code, name in config_core.org.names_by_lang.items()
     ]
@@ -100,7 +103,7 @@ def build_pysaml2_config(
         ],
         "entity_category": entity_categories,
         "http_client_timeout": 10,
-        "logging": {},
+        "logging": None,
         "metadata": [  # configure metadata-loader that loads from SQL
             {
                 "class": "invenio_edugain.utils.MetaDataFlaskSQL",
@@ -127,10 +130,10 @@ def build_pysaml2_config(
     }
 
 
-def build_sp(app: Flask, core_config: Pysaml2ConfigCore) -> dict[str, TupleJSON]:
+def build_sp(app: Flask, core_config: Pysaml2ConfigCore) -> dict[str, JSONplusTuples]:
     """Build 'sp' part of a pysaml2 configuration."""
     # acs_enpoints
-    acs_endpoints: list[TupleJSON] = [
+    acs_endpoints: list[JSONplusTuples] = [
         (url_for_server(app, domain, "invenio_edugain.acs"), BINDING_HTTP_POST)
         for domain in [
             core_config.server_domain_main,
@@ -139,7 +142,7 @@ def build_sp(app: Flask, core_config: Pysaml2ConfigCore) -> dict[str, TupleJSON]
     ]
 
     # ui-info
-    ui_info: dict[str, TupleJSON] = {}
+    ui_info: dict[str, JSONplusTuples] = {}
     ui_info["description"] = [
         {"text": text, "lang": lang_code}
         for lang_code, text in core_config.ui_info.descriptions_by_lang.items()
