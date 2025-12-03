@@ -22,6 +22,7 @@ from flask import (
     request,
 )
 from flask_security import login_user
+from invenio_db import db
 from invenio_i18n.proxies import current_i18n
 from saml2.client import Saml2Client
 from saml2.config import Config, SPConfig
@@ -29,6 +30,7 @@ from saml2.mdstore import MetadataStore
 from saml2.metadata import entity_descriptor
 from werkzeug.wrappers import Response as BaseResponse
 
+from .models import IdPData
 from .utils import (
     NS_PREFIX,
     AuthnInfo,
@@ -55,9 +57,17 @@ def disco_feed() -> list:
     config.load(config_dict)
     mds: MetadataStore = config.metadata
 
+    discoverable_query = db.select(
+        IdPData.id,
+    ).where(
+        IdPData.discoverable == db.true(),
+        IdPData.enabled == db.true(),
+    )
+    discoverable_idp_ids: set[str] = set(db.session.scalars(discoverable_query))
+
     feed = []
-    idp_ids: list[str] = sorted(mds.identity_providers())
-    for idp_id in idp_ids:
+    available_idp_ids = sorted(set(mds.identity_providers()) & discoverable_idp_ids)
+    for idp_id in available_idp_ids:
         # entry is one item in the feed
         entry: dict[str, list | str] = {"entityID": idp_id}
 
