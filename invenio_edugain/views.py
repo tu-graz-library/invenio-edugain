@@ -24,6 +24,7 @@ from flask import (
 from flask_security import login_user
 from invenio_db import db
 from invenio_i18n.proxies import current_i18n
+from invenio_oauthclient.utils import get_safe_redirect_target
 from saml2.client import Saml2Client
 from saml2.config import Config, SPConfig
 from saml2.mdstore import MetadataStore
@@ -36,6 +37,7 @@ from .utils import (
     AuthnInfo,
     AuthnResponseError,
     create_user,
+    secure_redirect_url,
 )
 
 
@@ -115,7 +117,13 @@ def authn_request() -> BaseResponse:
     entityid = request.args.get("entityID")
     if entityid is None:
         abort(400, description="Missing required parameter: id")
-    relay_state = request.args.get("next", "/")  # TODO: make default configurable
+
+    # "relay state" is SAML's name for "URL to redirect to after succesful login"
+    relay_state: str = (
+        get_safe_redirect_target(arg="next")
+        or current_app.config.get("SECURITY_POST_LOGIN_VIEW")
+        or "/"
+    )
 
     # pysaml2: create authn-request
     config_dict = current_app.config["EDUGAIN_PYSAML2_CONFIG"]
@@ -180,7 +188,7 @@ def sp_xml() -> Response:
 
 def acs() -> BaseResponse:
     """Assertion consumer service."""  # noqa:D401
-    next_url = request.form.get("RelayState")
+    next_url = secure_redirect_url(request.form.get("RelayState", ""))
     saml_response = request.form.get("SAMLResponse")
     if saml_response is None:
         msg = "POST contained no SAMLResponse"
