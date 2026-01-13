@@ -66,6 +66,7 @@ export function IdPSelectUI() {
   var showListFirst;
   var noWriteCookie;
   var ignoreURLParams;
+  var extraCompareRegex;
 
   var autoFollowCookie;
   var autoFollowCookieTTLs;
@@ -145,8 +146,23 @@ export function IdPSelectUI() {
       }
     }
 
-    if (!load(parms.dataSource)) {
+    if (parms.dataSource != null) {
+      idpData = load(parms.dataSource);
+      if (idpData == null) {
+        return;
+      }
+    } else if (parms.dataSources == null || !Array.isArray(parms.dataSources)) {
+      fatal(getLocalizedMessage("fatal.loadFailed") + parms.dataSources);
       return;
+    } else {
+      idpData = [];
+      for (var i = 0; i < parms.dataSources.length; i++) {
+        var next = load(parms.dataSources[i]);
+        if (next == null) {
+          return;
+        }
+        idpData = idpData.concat(next);
+      }
     }
     deDupe();
     stripHidden(parms.hiddenIdPs);
@@ -203,6 +219,8 @@ export function IdPSelectUI() {
     } else {
       ignoreURLParams = false;
     }
+
+    extraCompareRegex = paramsSupplied.extraCompareRegex;
 
     defaultLogo = paramsSupplied.defaultLogo;
     defaultLogoWidth = paramsSupplied.defaultLogoWidth;
@@ -298,6 +316,7 @@ export function IdPSelectUI() {
     //
     var policy = "urn:oasis:names:tc:SAML:profiles:SSO:idpdiscovery-protocol:single";
     var i;
+    var splitIndex;
     var isPassive = false;
     var parms;
     var parmPair;
@@ -339,10 +358,19 @@ export function IdPSelectUI() {
       }
 
       for (i = 0; i < parms.length; i++) {
-        parmPair = parms[i].split("=");
-        if (parmPair.length != 2) {
-          continue;
+        //
+        // Process url encoding parameters according to URL whatwg standard
+        //
+        splitIndex = parms[i].indexOf("=");
+        if (splitIndex < 0) {
+          parmPair = [parms[i], ""];
+        } else {
+          parmPair = [
+            parms[i].substring(0, splitIndex),
+            parms[i].substring(splitIndex + 1),
+          ];
         }
+
         if (parmPair[0] == "entityID") {
           suppliedEntityId = decodeURIComponent(parmPair[1]);
         } else if (parmPair[0] == "return") {
@@ -451,10 +479,19 @@ export function IdPSelectUI() {
     parmlist = returnString.substring(i + 1);
     parms = parmlist.split("&");
     for (i = 0; i < parms.length; i++) {
-      parmPair = parms[i].split("=");
-      if (parmPair.length != 2) {
-        continue;
+      //
+      // Process url encoding parameters according to URL whatwg standard
+      //
+      splitIndex = parms[i].indexOf("=");
+      if (splitIndex < 0) {
+        parmPair = [parms[i], ""];
+      } else {
+        parmPair = [
+          parms[i].substring(0, splitIndex),
+          parms[i].substring(splitIndex + 1),
+        ];
       }
+
       parmPair[1] = decodeURIComponent(parmPair[1]);
       returnParms.push(parmPair);
     }
@@ -603,7 +640,7 @@ export function IdPSelectUI() {
     }
     if (null == xhr) {
       fatal(getLocalizedMessage("fatal.noXMLHttpRequest"));
-      return false;
+      return null;
     }
 
     if (isIE()) {
@@ -630,19 +667,18 @@ export function IdPSelectUI() {
       var jsonData = xhr.responseText;
       if (jsonData === null) {
         fatal(getLocalizedMessage("fatal.noData"));
-        return false;
+        return null;
       }
 
       //
       // Parse it
       //
 
-      idpData = JSON.parse(jsonData);
+      return JSON.parse(jsonData);
     } else {
       fatal(getLocalizedMessage("fatal.loadFailed") + dataSource);
-      return false;
+      return null;
     }
-    return true;
   };
 
   /**
@@ -676,32 +712,52 @@ export function IdPSelectUI() {
       // See GetLocalizedEntry
       //
       var bestFit = null;
+      var bestFitAnyLang = null;
       var i;
       if (null == idp.Logos) {
         return null;
       }
+
       for (i in idp.Logos) {
         if (
-          idp.Logos[i].lang == language &&
           idp.Logos[i].width != null &&
           idp.Logos[i].width >= minWidth &&
           idp.Logos[i].height != null &&
           idp.Logos[i].height >= minHeight
         ) {
-          if (bestFit === null) {
-            bestFit = idp.Logos[i];
+          if (bestFitAnyLang == null) {
+            bestFitAnyLang = idp.Logos[i];
+          }
+
+          if (idp.Logos[i].lang == language) {
+            if (bestFit === null) {
+              bestFit = idp.Logos[i];
+            } else {
+              var me = Math.abs(
+                bestRatio - Math.log(idp.Logos[i].width / idp.Logos[i].height)
+              );
+              var him = Math.abs(bestRatio - Math.log(bestFit.width / bestFit.height));
+              if (him > me) {
+                bestFit = idp.Logos[i];
+              }
+            }
           } else {
-            var me = Math.abs(
+            me = Math.abs(
               bestRatio - Math.log(idp.Logos[i].width / idp.Logos[i].height)
             );
-            var him = Math.abs(bestRatio - Math.log(bestFit.width / bestFit.height));
+            him = Math.abs(
+              bestRatio - Math.log(bestFitAnyLang.width / bestFitAnyLang.height)
+            );
             if (him > me) {
-              bestFit = idp.Logos[i];
+              bestFitAnyLang = idp.Logos[i];
             }
           }
         }
       }
-      return bestFit;
+      if (bestFit != null) {
+        return bestFit;
+      }
+      return bestFitAnyLang;
     };
 
     var bestFit = null;
@@ -998,7 +1054,8 @@ export function IdPSelectUI() {
       ie6Hack,
       alwaysShow,
       maxResults,
-      getKeywords
+      getHints,
+      compareName
     );
 
     var a = document.createElement("a");
@@ -1190,11 +1247,13 @@ export function IdPSelectUI() {
     */
 
   var buildHelpText = function (containerDiv) {
-    var aval = document.createElement("a");
-    aval.href = helpURL;
-    aval.appendChild(document.createTextNode(getLocalizedMessage("helpText")));
-    setClass(aval, "HelpButton");
-    containerDiv.appendChild(aval);
+    if (helpURL != null) {
+      var aval = document.createElement("a");
+      aval.href = helpURL;
+      aval.appendChild(document.createTextNode(getLocalizedMessage("helpText")));
+      setClass(aval, "HelpButton");
+      containerDiv.appendChild(aval);
+    }
   };
 
   /**
@@ -1326,7 +1385,7 @@ export function IdPSelectUI() {
     for (i = 0; i < idp.Logos.length; i++) {
       var logo = idp.Logos[i];
 
-      if (logo.height == "16" && logo.width == "16") {
+      if (logo.height == logo.width) {
         if (
           null == logo.lang ||
           lang == logo.lang ||
@@ -1358,13 +1417,35 @@ export function IdPSelectUI() {
     return getEntityId(idp);
   };
 
-  var getKeywords = function (idp) {
-    if (ignoreKeywords || null == idp.Keywords) {
-      return null;
+  var compareName = function (compareName, typedName) {
+    if (compareName.toLowerCase().indexOf(typedName) != -1) {
+      return true;
     }
-    var s = getLocalizedEntry(idp.Keywords);
+    if (extraCompareRegex == null) {
+      return false;
+    }
+    typedName = typedName.normalize("NFD").replace(extraCompareRegex, "");
+    compareName = compareName.normalize("NFD").replace(extraCompareRegex, "");
+    if (compareName.toLowerCase().indexOf(typedName) != -1) {
+      return true;
+    }
+    return false;
+  };
 
-    return s;
+  var getHints = function (idp) {
+    var keys;
+    if (ignoreKeywords || null == idp.Keywords) {
+      keys = null;
+    } else {
+      keys = getLocalizedEntry(idp.Keywords);
+    }
+    if (keys == null) {
+      return idp.Hints;
+    }
+    if (idp.Hints == null) {
+      return keys;
+    }
+    return keys + " " + idp.Hints;
   };
 
   var getLocalizedEntry = function (theArray) {
