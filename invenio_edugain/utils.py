@@ -144,7 +144,7 @@ class AuthnInfo:
     """Parsed authentication info."""
 
     id_by_method: dict[str, str | None]  # NOTE: ids hashed, preferred methods first
-    additional_attributes: dict[str, list[str]]
+    additional_attributes: dict[str, list[str]]  # unrequested attributes sent by IdP
     affiliations: list[str]
     emails: list[str]  # potentially empty list
     full_name: str  # potentially empty string

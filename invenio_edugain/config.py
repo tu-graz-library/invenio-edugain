@@ -38,7 +38,7 @@ See pysaml2's "Configuration of PySAML2 entities" documentation for advanced con
 """
 EDUGAIN_PYSAML2_CONFIG_BUILDING_ENABLED: bool = True
 """Disable automatic config-building to configure yourself instead.
-When configuring yourself, set your configuration to `EDUGAIN_PYSAML2_CONFIG`.
+When configuring yourself, set your configuration to `app.config["EDUGAIN_PYSAML2_CONFIG"]`.
 Feel free to use (parts of) the config-building-machinery in `invenio_edugain.build_config`.
 """
 
@@ -50,7 +50,7 @@ See the bundled shibboleth-eds/idpselect_config.js for default values.
 """
 EDUGAIN_SHIBBOLETH_EDS_CONFIG_BUILDING_ENABLED: bool = True
 """Disable automatic config-building to configure yourself instead.
-When configuring yourself, set your configuration to `SHIBBOLETH_EDS`.
+When configuring yourself, set your configuration to `app.config["EDUGAIN_SHIBBOLETH_EDS_CONFIG"]`.
 Feel free to use (parts of) the config-building-machinery in `invenio_edugain.build_config`.
 """
 EDUGAIN_SHIBBOLETH_EDS_CONFIG_KWARGS: ShibbolethEDSKwargs | None = None
