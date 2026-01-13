@@ -28,6 +28,7 @@ from saml2.config import Config, SPConfig
 from saml2.mdstore import InMemoryMetaData, MetadataStore
 from saml2.response import AuthnResponse
 from sqlalchemy import true
+from uritools import uricompose, urisplit
 
 from .models import IdPData
 
@@ -285,3 +286,27 @@ def create_user(authn_info: AuthnInfo) -> User:
     db.session.commit()
 
     return user
+
+
+def secure_redirect_url(unsafe_url: str) -> str:
+    """Create safe (local) redirect URL from potentially unsafe (remote) URL.
+
+    This mirrors invenio_oauthclient.utils:get_safe_redirect_target,
+    but with different arguments.
+    """
+    allowed_hosts = current_app.config.get("APP_ALLOWED_HOSTS") or []
+    split_uri = urisplit(unsafe_url)
+    if split_uri.host in allowed_hosts:
+        # given url was safe after all...
+        return unsafe_url
+    if split_uri.path:
+        return uricompose(
+            # leave out scheme=..., and authority=... to compose a local uri
+            path=split_uri.getpath(),
+            query=split_uri.getquery(),
+            fragment=split_uri.getfragment(),
+        )
+    if security_url := current_app.config.get("SECURITY_POST_LOGIN_VIEW"):
+        return security_url
+
+    return "/"
