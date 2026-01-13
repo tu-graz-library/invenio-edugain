@@ -29,7 +29,8 @@ class ShibbolethEDSKwargs(TypedDict):
     autoFollowCookieTTLs: list[int]
     autoFollowCookieProps: str | None
     best_ratio: float  # NOTE: must be set to math.log(ratio)
-    dataSource: str
+    dataSource: str  # NOTE: recommended to use `dataSources` instead
+    dataSources: list[str]
     defaultLanguage: str
     defaultLogo: str
     defaultLogoHeight: int
@@ -37,6 +38,7 @@ class ShibbolethEDSKwargs(TypedDict):
     defaultReturn: str
     defaultReturnIDParam: str
     doNotCollapse: bool
+    extraCompareRegex: str | None  # NOTE: literal string, no regex expansion
     helpURL: str | None
     hiddenIdPs: list[str] | None
     # ie6Hack  # noone should need this anymore...
