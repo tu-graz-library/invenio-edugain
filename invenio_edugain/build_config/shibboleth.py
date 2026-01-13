@@ -15,7 +15,7 @@ from flask import Flask
 from .utils import JSON, url_for_server
 
 
-class ShibbolethEDSKwargs(TypedDict):
+class ShibbolethEDSKwargs(TypedDict, total=False):
     """TypedDict of values available for shibboleth-eds config.
 
     For further info on these see:
