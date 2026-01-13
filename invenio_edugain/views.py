@@ -97,11 +97,19 @@ def disco_feed() -> list:
             for kw in uiinfo.get("keywords", [])
         ]
 
-        entry["Logos"] = [
-            {"value": logo["text"], "height": logo["height"], "width": logo["width"]}
-            for uiinfo in uiinfos
-            for logo in uiinfo.get("logo", [])
-        ]
+        logo_entries = []
+        for uiinfo in uiinfos:
+            for logo in uiinfo.get("logo", []):
+                logo_entry = {
+                    "value": logo["text"],
+                    "height": logo["height"],
+                    "width": logo["width"],
+                }
+                if "lang" in logo:
+                    logo_entry["lang"] = logo["lang"]
+                logo_entries.append(logo_entry)
+        entry["Logos"] = logo_entries
+
         feed.append(entry)
 
     return feed
