@@ -11,13 +11,16 @@ authors = [
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 keywords = ["invenio", "edugain"]
-license = {file = "LICENSE"}
+license = "MIT AND Apache-2.0"
+license-files = [
+  "LICENSE",  # MIT license
+  "invenio_edugain/assets/semantic-ui/shibboleth-embedded-ds-*/LICENSE*",  # Apache 2.0 license
+]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
