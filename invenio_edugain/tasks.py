@@ -8,6 +8,7 @@
 """Celery tasks for invenio-edugain."""
 
 from celery import shared_task
+from flask import current_app
 
 from . import ingest
 from .utils import load_mdstore
@@ -21,4 +22,12 @@ def ingest_idp_data(
 ) -> None:
     """Ingest idp-data from given SAML metadata XML into db."""
     mds = load_mdstore(metadata_xml_location, cert_location, fingerprint_sha256)
-    ingest.from_mdstore(mds)
+    item = ingest.from_mdstore(mds)
+
+    log_msg = (
+        f"succesfully ingested IdP data from {metadata_xml_location!r}:\n"
+        f"{len(item.added_idp_ids)} added: {item.added_idp_ids!r},\n"
+        f"{len(item.updated_idp_ids)} updated: {item.updated_idp_ids!r},\n"
+        f"{len(item.unchanged_idp_ids)} unchanged: [...]"  # list of unchanged omitted for log brevity
+    )
+    current_app.logger.info(log_msg)
