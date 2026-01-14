@@ -163,7 +163,11 @@ def authn_request() -> BaseResponse:
         for header_name, header_value in http_args["headers"]
         if header_name == "Location"
     ]
-    if len(redirect_urls) != 1:
+    if len(redirect_urls) < 1:
+        # this shouldn't ever happen...
+        msg = "pysaml2 gave no redirect urls"
+        raise ValueError(msg)
+    if len(redirect_urls) > 1:
         # this shouldn't ever happen...
         msg = "pysaml2 gave multiple redirect urls"
         raise ValueError(msg)
