@@ -62,7 +62,7 @@ class IngestIdPDataJob(JobType):
     description = "Ingests IdP data from given file/URL into db"  # TODO: translate
     id = "ingest_idp_data"
     task = ingest_idp_data
-    title = "Ingest IdP data"  # TODO: translate
+    title = "edugain/SAML: ingest identity provider data"
 
     @classmethod
     def build_task_arguments(
