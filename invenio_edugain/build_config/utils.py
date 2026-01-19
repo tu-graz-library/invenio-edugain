@@ -37,7 +37,7 @@ type AbsentType = Literal[_ABSENT.ABSENT]
 type JSON = str | int | float | bool | None | dict[str, JSON] | list[JSON]
 
 
-class CoreExceptionGroup(ExceptionGroup):
+class EdugainConfigCoreExceptionGroup(ExceptionGroup):
     """Exception group used by `Pysaml2ConfigCore...` classes, distinguishable from `ExceptionGroup`."""
 
 
