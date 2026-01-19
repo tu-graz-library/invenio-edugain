@@ -189,7 +189,7 @@ def url_for_server(app: Flask, server_name: str | None, endpoint: str) -> str:
         server_name_without_scheme = ""
         script_name = server_name
         want_absolute_url = False
-    elif (split_server_name := urisplit(server_name)).scheme:
+    elif (split_server_name := urisplit(server_name)).getscheme():
         scheme = split_server_name.getscheme()
         server_name_without_scheme = uricompose(
             scheme=None,
@@ -198,7 +198,7 @@ def url_for_server(app: Flask, server_name: str | None, endpoint: str) -> str:
             query=split_server_name.getquery(),
             fragment=split_server_name.getfragment(),
         )
-        if split_server_name.authority:
+        if split_server_name.getauthority():
             # when an authority was parsed, uricompose's result starts with `//`
             # flask requires this to be gone instead
             server_name_without_scheme = server_name_without_scheme[2:]
