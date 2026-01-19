@@ -138,7 +138,7 @@ class FilePath(Path):
             raise FileNotFoundError(msg)
 
 
-def typing_deco[**P, R](func: Callable[P, R]) -> Callable:
+def typing_deco[**P, R](func: Callable[P, R]):  # noqa: ANN201
     """Catch ParamSpec of passed-in func as to apply it to returned `field_for`.
 
     This only exists s.t. `field_for` can retain type-information.
