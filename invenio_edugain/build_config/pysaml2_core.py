@@ -205,7 +205,7 @@ class Pysaml2ConfigCoreEntityCategories(Pysaml2ConfigCoreBase):
     """
 
     # claims compliance with Geant CoC
-    coc_compliant: bool = field_for("EDUGAIN_COC_COMPLIANT")
+    geant_coc_compliant: bool = field_for("EDUGAIN_GEANT_COC_COMPLIANT")
     # claims compliance with REFEDS research and scholarship
     refeds_compliant: bool = field_for("EDUGAIN_REFEDS_COMPLIANT")
 
