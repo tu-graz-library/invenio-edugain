@@ -7,12 +7,13 @@
 
 """Utils for invenio-edugain."""
 
+import enum
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
 from os import PathLike
 from tempfile import NamedTemporaryFile
-from typing import Any, Self, TypeGuard
+from typing import Any, Literal, Self, TypeGuard
 
 import requests
 import validators
@@ -31,6 +32,22 @@ from sqlalchemy import true
 from uritools import uricompose, urisplit
 
 from .models import IdPData
+
+
+class _ABSENT(enum.Enum):
+    """Sentinel distinguishable from `None`."""
+
+    ABSENT = enum.auto()
+
+    def __repr__(self) -> str:
+        return "ABSENT"
+
+    def __bool__(self) -> Literal[False]:
+        return False
+
+
+ABSENT = _ABSENT.ABSENT
+type AbsentType = Literal[_ABSENT.ABSENT]
 
 NS_PREFIX = {
     "alg": "urn:oasis:names:tc:SAML:metadata:algsupport",
