@@ -212,7 +212,7 @@ def acs() -> BaseResponse:
         # to prevent name collisions of users with same name, use random username instead
         # we never show username to other users anyway...
         # 16 bytes means chance of collisions is virtually 0 up to about 10**15 users
-        authn_info.username = "user-" + token_hex(nbytes=16)
+        authn_info.suggested_username = "user-" + token_hex(nbytes=16)
         authn_info.user = create_user(authn_info)
 
     if not login_user(authn_info.user):
