@@ -108,6 +108,15 @@ def disco_feed() -> list:
                 if "lang" in logo:
                     logo_entry["lang"] = logo["lang"]
                 logo_entries.append(logo_entry)
+        if not any(le["height"] == le["width"] for le in logo_entries):
+            # add fallback for small icon showing next to dropdown choices
+            logo_entries.append(
+                {
+                    "value": "/static/transparent-16x16.png",
+                    "height": 16,
+                    "width": 16,
+                },
+            )
         entry["Logos"] = logo_entries
 
         feed.append(entry)
