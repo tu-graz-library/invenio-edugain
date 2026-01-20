@@ -297,6 +297,10 @@ def create_user(authn_info: AuthnInfo) -> User:
         msg = "Tried to create a user when they already exist"
         raise ValueError(msg)
 
+    if not authn_info.emails:
+        msg = "Cannot create user when no email was given"
+        raise ValueError(msg)
+
     # use first provided method of login
     method, external_id = next(
         (meth, id_) for meth, id_ in authn_info.id_by_method.items() if id_ is not None
