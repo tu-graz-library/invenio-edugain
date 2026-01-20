@@ -97,6 +97,11 @@ def build_shibboleth_eds_config(
             server_name=None,  # construct relative URL, e.g. "/saml/discofeed"
             endpoint="invenio_edugain.disco_feed",
         ),
+        # logo defaults are as per shibboleth's suggestion
+        # see https://shibboleth.atlassian.net/wiki/spaces/EDS10/pages/2383446048/3.2+EDS+Configuration+Options#defaultLogo
+        "defaultLogo": "/static/icons/transparent-80x60.png",
+        "defaultLogoHeight": kwargs.get("maxHeight", 60),
+        "defaultLogoWidth": kwargs.get("maxWidth", 80),
         "defaultReturn": url_for_server(
             app,
             server_name=app.config["SERVER_NAME"],
