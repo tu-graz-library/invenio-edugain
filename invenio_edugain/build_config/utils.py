@@ -7,32 +7,17 @@
 
 """Utils for building configs."""
 
-import enum
 from collections.abc import Callable
 from dataclasses import field
 from pathlib import Path
-from typing import Any, Literal, NamedTuple
+from typing import Any, NamedTuple
 
 from email_validator import ValidatedEmail, validate_email
 from flask import Flask
 from flask.app import BuildError
 from uritools import uricompose, urisplit
 
-
-class _ABSENT(enum.Enum):
-    """Sentinel distinguishable from `None`."""
-
-    ABSENT = enum.auto()
-
-    def __repr__(self) -> str:
-        return "ABSENT"
-
-    def __bool__(self) -> Literal[False]:
-        return False
-
-
-ABSENT = _ABSENT.ABSENT
-type AbsentType = Literal[_ABSENT.ABSENT]
+from ..utils import ABSENT
 
 type JSON = str | int | float | bool | None | dict[str, JSON] | list[JSON]
 

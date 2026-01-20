@@ -14,6 +14,7 @@ from invenio_jobs.models import Job
 from marshmallow import Schema, fields
 
 from .tasks import ingest_idp_data
+from .utils import ABSENT, AbsentType
 
 
 class IngestIdPDataArgsSchema(Schema):
@@ -48,13 +49,6 @@ class IngestIdPDataArgsSchema(Schema):
     )
 
 
-class ABSENT:
-    """Sentinel distinct from `None`.
-
-    Signifies that this argument was absent in function call.
-    """
-
-
 class IngestIdPDataJob(JobType):
     """Job for ingesting IdP data into database."""
 
@@ -69,9 +63,9 @@ class IngestIdPDataJob(JobType):
         cls,
         job_obj: Job,  # noqa: ARG003
         since: datetime | None = None,  # noqa: ARG003
-        metadata_xml_location: str | None | type[ABSENT] = ABSENT,
-        cert_location: str | None | type[ABSENT] = ABSENT,
-        fingerprint_sha256: str | None | type[ABSENT] = ABSENT,
+        metadata_xml_location: str | None | AbsentType = ABSENT,
+        cert_location: str | None | AbsentType = ABSENT,
+        fingerprint_sha256: str | None | AbsentType = ABSENT,
         job_arg_schema: str | None = None,  # noqa: ARG003
     ) -> dict:
         """Generate arguments for task.

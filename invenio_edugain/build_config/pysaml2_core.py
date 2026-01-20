@@ -12,8 +12,8 @@ from collections.abc import Mapping
 from dataclasses import Field, InitVar, dataclass, field, fields
 from typing import Any, get_origin
 
+from ..utils import ABSENT
 from .utils import (
-    ABSENT,
     JSON,
     EdugainConfigCoreExceptionGroup,
     Email,
