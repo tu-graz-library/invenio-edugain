@@ -35,6 +35,7 @@ dependencies = [
 tests = [
   "invenio-app>=2.0.0,<3.0.0",
   "invenio-db[postgresql]>=2.0.0,<3.0.0",
+  'lxml>=4.5.2',
   "pytest-black>=0.6.0",
   "pytest-invenio>=3.0.0",
   "ruff>=0.9.6",
