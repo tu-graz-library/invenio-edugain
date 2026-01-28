@@ -6,6 +6,7 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Build configuration for pysaml2."""
+
 from flask import Flask
 from saml2 import BINDING_HTTP_POST
 from saml2.entity_category.edugain import COC
