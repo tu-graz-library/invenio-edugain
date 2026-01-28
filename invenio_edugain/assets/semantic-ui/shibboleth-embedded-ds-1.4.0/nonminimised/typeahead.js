@@ -28,7 +28,8 @@ export function TypeAheadControl(
   ie6hack,
   alwaysShow,
   maxResults,
-  getKeywords
+  getHints,
+  compareName
 ) {
   //
   // Squirrel away the parameters we were given
@@ -45,7 +46,8 @@ export function TypeAheadControl(
   this.getName = getName;
   this.getEntityId = getEntityId;
   this.geticon = geticon;
-  this.getKeywords = getKeywords;
+  this.getHints = getHints;
+  this.compareName = compareName;
 }
 
 TypeAheadControl.prototype.draw = function (setFocus) {
@@ -151,7 +153,7 @@ TypeAheadControl.prototype.getPossible = function (name) {
     //
     // Check name
     //
-    if (thisName.toLowerCase().indexOf(name) != -1) {
+    if (this.compareName(thisName, name)) {
       hit = true;
     }
     //
@@ -165,8 +167,8 @@ TypeAheadControl.prototype.getPossible = function (name) {
     }
 
     if (!hit) {
-      var thisKeywords = this.getKeywords(this.elementList[inIndex]);
-      if (null != thisKeywords && thisKeywords.toLowerCase().indexOf(name) != -1) {
+      var thisHints = this.getHints(this.elementList[inIndex]);
+      if (null != thisHints && this.compareName(thisHints, name)) {
         hit = true;
       }
     }

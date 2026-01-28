@@ -15,7 +15,7 @@ from flask import Flask
 from .utils import JSON, url_for_server
 
 
-class ShibbolethEDSKwargs(TypedDict):
+class ShibbolethEDSKwargs(TypedDict, total=False):
     """TypedDict of values available for shibboleth-eds config.
 
     For further info on these see:
@@ -29,7 +29,8 @@ class ShibbolethEDSKwargs(TypedDict):
     autoFollowCookieTTLs: list[int]
     autoFollowCookieProps: str | None
     best_ratio: float  # NOTE: must be set to math.log(ratio)
-    dataSource: str
+    dataSource: str  # NOTE: recommended to use `dataSources` instead
+    dataSources: list[str]
     defaultLanguage: str
     defaultLogo: str
     defaultLogoHeight: int
@@ -37,6 +38,7 @@ class ShibbolethEDSKwargs(TypedDict):
     defaultReturn: str
     defaultReturnIDParam: str
     doNotCollapse: bool
+    extraCompareRegex: str | None  # NOTE: literal string, no regex expansion
     helpURL: str | None
     hiddenIdPs: list[str] | None
     # ie6Hack  # noone should need this anymore...
@@ -95,6 +97,11 @@ def build_shibboleth_eds_config(
             server_name=None,  # construct relative URL, e.g. "/saml/discofeed"
             endpoint="invenio_edugain.disco_feed",
         ),
+        # logo defaults are as per shibboleth's suggestion
+        # see https://shibboleth.atlassian.net/wiki/spaces/EDS10/pages/2383446048/3.2+EDS+Configuration+Options#defaultLogo
+        "defaultLogo": "/static/icons/transparent-80x60.png",
+        "defaultLogoHeight": kwargs.get("maxHeight", 60),
+        "defaultLogoWidth": kwargs.get("maxWidth", 80),
         "defaultReturn": url_for_server(
             app,
             server_name=app.config["SERVER_NAME"],

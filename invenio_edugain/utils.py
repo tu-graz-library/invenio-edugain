@@ -7,12 +7,13 @@
 
 """Utils for invenio-edugain."""
 
+import enum
+import string
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from hashlib import sha256
 from os import PathLike
 from tempfile import NamedTemporaryFile
-from typing import Any, Self, TypeGuard
+from typing import Any, Literal, Self, TypedDict, TypeGuard
 
 import requests
 import validators
@@ -28,8 +29,25 @@ from saml2.config import Config, SPConfig
 from saml2.mdstore import InMemoryMetaData, MetadataStore
 from saml2.response import AuthnResponse
 from sqlalchemy import true
+from uritools import uricompose, urisplit
 
 from .models import IdPData
+
+
+class _ABSENT(enum.Enum):
+    """Sentinel distinguishable from `None`."""
+
+    ABSENT = enum.auto()
+
+    def __repr__(self) -> str:
+        return "ABSENT"
+
+    def __bool__(self) -> Literal[False]:
+        return False
+
+
+ABSENT = _ABSENT.ABSENT
+type AbsentType = Literal[_ABSENT.ABSENT]
 
 NS_PREFIX = {
     "alg": "urn:oasis:names:tc:SAML:metadata:algsupport",
@@ -139,21 +157,33 @@ class AuthnResponseError(Exception):
     """Raised when authn response is incorrect somehow."""
 
 
+IdByMethodDict = TypedDict(
+    "IdByMethodDict",
+    {
+        "pairwise-id": str | None,
+        "subject-id": str | None,
+        "eduPersonPrincipalName": str | None,
+    },
+)
+
+
 @dataclass
 class AuthnInfo:
     """Parsed authentication info."""
 
-    id_by_method: dict[str, str | None]  # NOTE: ids hashed, preferred methods first
-    additional_attributes: dict[str, list[str]]
+    id_by_method: IdByMethodDict  # NOTE: ids hashed, preferred methods first
+    additional_attributes: dict[str, list[str]]  # unrequested attributes sent by IdP
     affiliations: list[str]
     emails: list[str]  # potentially empty list
     full_name: str  # potentially empty string
+    issuer: str
     next: str | None
+    pysaml2_response: AuthnResponse
+    suggested_username: str  # doesn't check for availability of username
     user: User | None  # None iff no corresponding user exists (yet)
-    username: str  # potentially empty string
 
     @classmethod
-    def from_saml_response(  # noqa: C901, PLR0912
+    def from_saml_response(  # noqa: C901, PLR0912, PLR0915
         cls,
         saml_xml_response: str,
         next_: str | None = None,
@@ -184,17 +214,13 @@ class AuthnInfo:
             id_by_method[method] = ids[0] if ids else None
 
         # pairwise-id is only unique in combination with issuer, combine them
-        if id_by_method["pairwise-id"]:
+        if id_by_method["pairwise-id"] is not None:
             issuer: str = authn_response.issuer()
             if not issuer:
                 # saml-core-2.0 marks <Issuer> as required
                 msg = "SAML <Response> didn't include mandatory <Issuer> field"
                 raise AuthnResponseError(msg)
             id_by_method["pairwise-id"] = f'{issuer}!{id_by_method["pairwise-id"]}'
-
-        # hash ids
-        for method, id_ in list(id_by_method.items()):
-            id_by_method[method] = sha256(id_.encode()).hexdigest() if id_ else None
 
         if all(id_ is None for id_ in id_by_method.values()):
             msg = "SAML <Response> contained no known kinds of identification"
@@ -205,14 +231,38 @@ class AuthnInfo:
         emails = ava.pop("mail", [])
         given_names = ava.pop("givenName", [])
         family_names = ava.pop("sn", [])
-
         fullname = (" ".join(given_names) + " " + " ".join(family_names)).strip()
-        if displaynames:
+
+        # compute username suggestion
+        # invenio usernames must match invenio_userprofiles.validators:username_regex:
+        # - only ASCII letters, digits, `-`, and `_`
+        # - must start with ASCII letter
+        # - >= 3 charcters
+        MIN_USERNAME_LEN = 3  # noqa:N806
+        if emails:
+            username = emails[0].replace("@", "_").replace(".", "-")
+        elif displaynames:
             username = displaynames[0]
-        elif emails:
-            username = emails[0].split("@")[0]
         else:
             username = fullname
+
+        if not username:
+            msg = (
+                "no username found in response;"
+                " most edugain IdPs adhere to REFEDS, which requires presence of username"
+                " - this is hence likely an error on the IdP's side"
+            )
+            raise AuthnResponseError(msg)
+
+        username = username.replace(" ", "-")
+        username = username.replace(".", "_")
+        username = username.replace("+", "_")
+        allowed_chars = string.ascii_letters + string.digits + "-_"
+        username = "".join(char for char in username if char in allowed_chars)
+        if username[0] not in string.ascii_letters:
+            username = "X" + username
+        if len(username) < MIN_USERNAME_LEN:
+            username = "X" * (MIN_USERNAME_LEN - len(username)) + username
 
         first_found_user = None
         for method, id_ in id_by_method.items():
@@ -225,14 +275,16 @@ class AuthnInfo:
                     raise AuthnResponseError(msg)
 
         return cls(
-            id_by_method=id_by_method,
+            id_by_method=id_by_method,  # type: ignore[arg-type]  # has correct keys, even if mypy can't tell
             additional_attributes=ava,
             affiliations=affiliations,
             emails=emails,
             full_name=fullname,
+            issuer=authn_response.issuer(),
             next=next_,
+            pysaml2_response=authn_response,
+            suggested_username=username,
             user=first_found_user,
-            username=username,
         )
 
 
@@ -245,6 +297,10 @@ def create_user(authn_info: AuthnInfo) -> User:
         msg = "Tried to create a user when they already exist"
         raise ValueError(msg)
 
+    if not authn_info.emails:
+        msg = "Cannot create user when no email was given"
+        raise ValueError(msg)
+
     # use first provided method of login
     method, external_id = next(
         (meth, id_) for meth, id_ in authn_info.id_by_method.items() if id_ is not None
@@ -254,7 +310,7 @@ def create_user(authn_info: AuthnInfo) -> User:
         "profile": {
             "affiliations": ";".join(authn_info.affiliations),
             "full_name": authn_info.full_name,
-            "username": authn_info.username,
+            "username": authn_info.suggested_username,
         },
     }
 
@@ -285,3 +341,27 @@ def create_user(authn_info: AuthnInfo) -> User:
     db.session.commit()
 
     return user
+
+
+def secure_redirect_url(unsafe_url: str) -> str:
+    """Create safe (local) redirect URL from potentially unsafe (remote) URL.
+
+    This mirrors invenio_oauthclient.utils:get_safe_redirect_target,
+    but with different arguments.
+    """
+    allowed_hosts = current_app.config.get("APP_ALLOWED_HOSTS") or []
+    split_uri = urisplit(unsafe_url)
+    if split_uri.host in allowed_hosts:
+        # given url was safe after all...
+        return unsafe_url
+    if split_uri.path:
+        return uricompose(
+            # leave out scheme=..., and authority=... to compose a local uri
+            path=split_uri.getpath(),
+            query=split_uri.getquery(),
+            fragment=split_uri.getfragment(),
+        )
+    if security_url := current_app.config.get("SECURITY_POST_LOGIN_VIEW"):
+        return security_url
+
+    return "/"

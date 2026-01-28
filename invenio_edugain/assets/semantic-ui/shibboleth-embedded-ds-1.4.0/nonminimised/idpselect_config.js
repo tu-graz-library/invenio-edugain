@@ -23,7 +23,7 @@ export function IdPSelectUIParms() {
   // Adjust the following to fit into your local configuration
   //
   this.alwaysShow = true; // If true, this will show results as soon as you start typing
-  this.dataSource = "/Shibboleth.sso/DiscoFeed"; // Where to get the data from
+  this.dataSources = ["/Shibboleth.sso/DiscoFeed"]; // Where to get the data from (in an array)
   this.defaultLanguage = "en"; // Language to use if the browser local doesnt have a bundle
   this.selectedLanguage = null; // Set this to override the browser default (for instance if you can
   // detect this from the URL.
@@ -52,6 +52,7 @@ export function IdPSelectUIParms() {
   this.samlIdPCookieTTL = 730; // in days, this cookie is used to offer previously chosen IDP as preferredIdP
   this.samlIdPCookieProps = "; Secure; SameSite=Lax"; // If set to a custom string, the string is appended to the cookie value
   this.setFocusTextBox = true; // Set to false to supress focus
+  this.extraCompareRegex = null; // To ignore diacriticals say something like this.extraCompareRegex = new RegExp("\\p{Diacritic}", "gu")
   this.testGUI = false;
 
   this.autoFollowCookie = null; //  If you want auto-dispatch, set this to the cookie name to use

@@ -63,7 +63,7 @@ def build_pysaml2_config(
 
     # entity_categories
     entity_categories = []
-    if config_core.category.coc_compliant:
+    if config_core.category.geant_coc_compliant:
         entity_categories.append(COC)
     if config_core.category.refeds_compliant:
         entity_categories.append(RESEARCH_AND_SCHOLARSHIP)

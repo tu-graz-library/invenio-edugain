@@ -12,10 +12,10 @@ from collections.abc import Mapping
 from dataclasses import Field, InitVar, dataclass, field, fields
 from typing import Any, get_origin
 
+from ..utils import ABSENT
 from .utils import (
-    ABSENT,
     JSON,
-    CoreExceptionGroup,
+    EdugainConfigCoreExceptionGroup,
     Email,
     FilePath,
     LangDict,
@@ -125,7 +125,7 @@ class Pysaml2ConfigCoreBase:
             if field_value is ABSENT and issubclass(field_type, Pysaml2ConfigCoreBase):
                 try:
                     field_value = field_type(flask_config=flask_config)
-                except CoreExceptionGroup as exception_group:
+                except EdugainConfigCoreExceptionGroup as exception_group:
                     exception_group = exception_group.with_traceback(None)
                     exception_group.add_note(
                         f"when automatically building from `flask_config` as its parent wasn't exlicitly passed `{field.name}`",
@@ -157,7 +157,7 @@ class Pysaml2ConfigCoreBase:
         exceptions = self.parse_fields(flask_config=flask_config)
         if exceptions:
             msg = f"error when initializing {type(self).__module__}.{type(self).__qualname__}"
-            raise CoreExceptionGroup(msg, exceptions)
+            raise EdugainConfigCoreExceptionGroup(msg, exceptions)
 
 
 @dataclass
@@ -205,7 +205,7 @@ class Pysaml2ConfigCoreEntityCategories(Pysaml2ConfigCoreBase):
     """
 
     # claims compliance with Geant CoC
-    coc_compliant: bool = field_for("EDUGAIN_COC_COMPLIANT")
+    geant_coc_compliant: bool = field_for("EDUGAIN_GEANT_COC_COMPLIANT")
     # claims compliance with REFEDS research and scholarship
     refeds_compliant: bool = field_for("EDUGAIN_REFEDS_COMPLIANT")
 

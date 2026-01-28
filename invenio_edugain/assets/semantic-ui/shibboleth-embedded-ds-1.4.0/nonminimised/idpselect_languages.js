@@ -36,7 +36,7 @@ export function IdPSelectLanguages() {
         "No parameters to discovery session and no defaultReturn parameter configured",
       "fatal.noReturnURL": "No URL return parameter provided",
       "fatal.badProtocol": "Return parameter must start with https:// or http://",
-      "fatal.badReturnString": "Return parameter is not whitelisted",
+      "fatal.badReturnString": "Return parameter is not on redirect allow list",
       "idpPreferred.label": "Use a suggested selection:",
       "idpEntry.label": "Or enter your organization's name",
       "idpEntry.NoPreferred.label": "Enter your organization's name",

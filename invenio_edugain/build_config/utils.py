@@ -7,37 +7,22 @@
 
 """Utils for building configs."""
 
-import enum
 from collections.abc import Callable
 from dataclasses import field
 from pathlib import Path
-from typing import Any, Literal, NamedTuple
+from typing import Any, NamedTuple
 
 from email_validator import ValidatedEmail, validate_email
 from flask import Flask
 from flask.app import BuildError
 from uritools import uricompose, urisplit
 
-
-class _ABSENT(enum.Enum):
-    """Sentinel distinguishable from `None`."""
-
-    ABSENT = enum.auto()
-
-    def __repr__(self) -> str:
-        return "ABSENT"
-
-    def __bool__(self) -> Literal[False]:
-        return False
-
-
-ABSENT = _ABSENT.ABSENT
-type AbsentType = Literal[_ABSENT.ABSENT]
+from ..utils import ABSENT
 
 type JSON = str | int | float | bool | None | dict[str, JSON] | list[JSON]
 
 
-class CoreExceptionGroup(ExceptionGroup):
+class EdugainConfigCoreExceptionGroup(ExceptionGroup):
     """Exception group used by `Pysaml2ConfigCore...` classes, distinguishable from `ExceptionGroup`."""
 
 
@@ -138,7 +123,7 @@ class FilePath(Path):
             raise FileNotFoundError(msg)
 
 
-def typing_deco[**P, R](func: Callable[P, R]) -> Callable:
+def typing_deco[**P, R](func: Callable[P, R]):  # noqa: ANN201
     """Catch ParamSpec of passed-in func as to apply it to returned `field_for`.
 
     This only exists s.t. `field_for` can retain type-information.
@@ -189,7 +174,7 @@ def url_for_server(app: Flask, server_name: str | None, endpoint: str) -> str:
         server_name_without_scheme = ""
         script_name = server_name
         want_absolute_url = False
-    elif (split_server_name := urisplit(server_name)).scheme:
+    elif (split_server_name := urisplit(server_name)).getscheme():
         scheme = split_server_name.getscheme()
         server_name_without_scheme = uricompose(
             scheme=None,
@@ -198,7 +183,7 @@ def url_for_server(app: Flask, server_name: str | None, endpoint: str) -> str:
             query=split_server_name.getquery(),
             fragment=split_server_name.getfragment(),
         )
-        if split_server_name.authority:
+        if split_server_name.getauthority():
             # when an authority was parsed, uricompose's result starts with `//`
             # flask requires this to be gone instead
             server_name_without_scheme = server_name_without_scheme[2:]

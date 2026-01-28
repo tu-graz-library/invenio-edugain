@@ -17,7 +17,7 @@ edugain = WebpackThemeBundle(
         "semantic-ui": {
             "aliases": {
                 "@js/invenio_edugain": "js/invenio_edugain",
-                "@js/shibboleth_eds": "shibboleth-embedded-ds-1.3.0/nonminimised",
+                "@js/shibboleth_eds": "shibboleth-embedded-ds-1.4.0/nonminimised",
             },
             "copy": {},
             "dependencies": {

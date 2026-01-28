@@ -24,6 +24,7 @@ from flask import (
 from flask_security import login_user
 from invenio_db import db
 from invenio_i18n.proxies import current_i18n
+from invenio_oauthclient.utils import get_safe_redirect_target
 from saml2.client import Saml2Client
 from saml2.config import Config, SPConfig
 from saml2.mdstore import MetadataStore
@@ -36,6 +37,7 @@ from .utils import (
     AuthnInfo,
     AuthnResponseError,
     create_user,
+    secure_redirect_url,
 )
 
 
@@ -95,11 +97,28 @@ def disco_feed() -> list:
             for kw in uiinfo.get("keywords", [])
         ]
 
-        entry["Logos"] = [
-            {"value": logo["text"], "height": logo["height"], "width": logo["width"]}
-            for uiinfo in uiinfos
-            for logo in uiinfo.get("logo", [])
-        ]
+        logo_entries = []
+        for uiinfo in uiinfos:
+            for logo in uiinfo.get("logo", []):
+                logo_entry = {
+                    "value": logo["text"],
+                    "height": logo["height"],
+                    "width": logo["width"],
+                }
+                if "lang" in logo:
+                    logo_entry["lang"] = logo["lang"]
+                logo_entries.append(logo_entry)
+        if not any(le["height"] == le["width"] for le in logo_entries):
+            # add fallback for small icon showing next to dropdown choices
+            logo_entries.append(
+                {
+                    "value": "/static/transparent-16x16.png",
+                    "height": 16,
+                    "width": 16,
+                },
+            )
+        entry["Logos"] = logo_entries
+
         feed.append(entry)
 
     return feed
@@ -115,7 +134,13 @@ def authn_request() -> BaseResponse:
     entityid = request.args.get("entityID")
     if entityid is None:
         abort(400, description="Missing required parameter: id")
-    relay_state = request.args.get("next", "/")  # TODO: make default configurable
+
+    # "relay state" is SAML's name for "URL to redirect to after succesful login"
+    relay_state: str = (
+        get_safe_redirect_target(arg="next")
+        or current_app.config.get("SECURITY_POST_LOGIN_VIEW")
+        or "/"
+    )
 
     # pysaml2: create authn-request
     config_dict = current_app.config["EDUGAIN_PYSAML2_CONFIG"]
@@ -147,7 +172,11 @@ def authn_request() -> BaseResponse:
         for header_name, header_value in http_args["headers"]
         if header_name == "Location"
     ]
-    if len(redirect_urls) != 1:
+    if len(redirect_urls) < 1:
+        # this shouldn't ever happen...
+        msg = "pysaml2 gave no redirect urls"
+        raise ValueError(msg)
+    if len(redirect_urls) > 1:
         # this shouldn't ever happen...
         msg = "pysaml2 gave multiple redirect urls"
         raise ValueError(msg)
@@ -180,7 +209,7 @@ def sp_xml() -> Response:
 
 def acs() -> BaseResponse:
     """Assertion consumer service."""  # noqa:D401
-    next_url = request.form.get("RelayState")
+    next_url = secure_redirect_url(request.form.get("RelayState", ""))
     saml_response = request.form.get("SAMLResponse")
     if saml_response is None:
         msg = "POST contained no SAMLResponse"
@@ -192,7 +221,7 @@ def acs() -> BaseResponse:
         # to prevent name collisions of users with same name, use random username instead
         # we never show username to other users anyway...
         # 16 bytes means chance of collisions is virtually 0 up to about 10**15 users
-        authn_info.username = "user-" + token_hex(nbytes=16)
+        authn_info.suggested_username = "user-" + token_hex(nbytes=16)
         authn_info.user = create_user(authn_info)
 
     if not login_user(authn_info.user):
