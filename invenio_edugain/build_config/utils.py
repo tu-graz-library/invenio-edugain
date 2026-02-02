@@ -10,7 +10,7 @@
 from collections.abc import Callable
 from dataclasses import field
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any, Concatenate, NamedTuple
 
 from email_validator import ValidatedEmail, validate_email
 from flask import Flask
@@ -123,7 +123,7 @@ class FilePath(Path):
             raise FileNotFoundError(msg)
 
 
-def typing_deco[**P, R](func: Callable[P, R]):  # noqa: ANN201
+def typing_deco[**P, R](func: Callable[P, R]) -> Callable[Concatenate[str, P], R]:
     """Catch ParamSpec of passed-in func as to apply it to returned `field_for`.
 
     This only exists s.t. `field_for` can retain type-information.
