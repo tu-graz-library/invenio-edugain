@@ -7,14 +7,18 @@
 
 """Flask-extension setup for invenio-edugain."""
 
+from traceback import format_exception
+
 from flask import Flask
 
 from . import config
 from .build_config import (
     Pysaml2ConfigCore,
+    UninitializedConfig,
     build_pysaml2_config,
     build_shibboleth_eds_config,
 )
+from .build_config.pysaml2 import JSONplusTuples  # noqa: TC001
 
 
 class InvenioEdugain:
@@ -45,15 +49,20 @@ def finalize_app(app: Flask) -> None:
 def setup_configuration(app: Flask) -> None:
     """Automatic setup of configuration (insofar enabled)."""
     if app.config.get("EDUGAIN_PYSAML2_CONFIG_BUILDING_ENABLED", True):
+        pysaml2_config: UninitializedConfig | dict[str, JSONplusTuples]
         try:
             config_core = Pysaml2ConfigCore(flask_config=app.config)
             pysaml2_config = build_pysaml2_config(app=app, config_core=config_core)
-        except Exception as exception:
+        except Exception as exception:  # noqa: BLE001
             exception.add_note(
-                "when automatically building pysaml2 config on startup\n"
+                "note: occured when automatically building pysaml2 config on startup\n"
+                "either make sure app.config is correct or turn off automatic building and build yourself\n"
                 "automatic building can be turned off via `EDUGAIN_PYSAML2_CONFIG_BUILDING_ENABLED`.",
             )
-            raise
+            msg = "".join(format_exception(exception))
+            app.logger.warning(msg)
+
+            pysaml2_config = UninitializedConfig(exception)
         app.config["EDUGAIN_PYSAML2_CONFIG"] = pysaml2_config
 
     if app.config.get("EDUGAIN_SHIBBOLETH_EDS_CONFIG_BUILDING_ENABLED", True):
