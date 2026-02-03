@@ -7,8 +7,16 @@
 
 """Configuration for invenio-edugain."""
 
+from collections.abc import Callable
+
+from werkzeug.wrappers import Response
+
 from .build_config import UninitializedConfig
 from .build_config.shibboleth import ShibbolethEDSKwargs
+from .utils import (
+    AuthnInfo,
+    default_authn_response_handler,
+)
 
 EDUGAIN_ALLOW_IMGSRC_CSP: bool | None = None
 """Whether to allow dico-page to set the `imgsrc: *` content-security-policy.
@@ -76,3 +84,13 @@ Set to configured webpack key.
 
 EDUGAIN_DISCOVERY_TEMPLATE: str = "invenio_edugain/login_discovery.html"
 """Template used for discovery page (i.e. the *choose your institution to log in with* page)."""
+
+#
+# configuration for response handler
+#
+EDUGAIN_AUTHN_RESPONSE_HANDLER: str | Callable[[AuthnInfo, str], Response] = (
+    default_authn_response_handler
+)
+"""Called after authn-response is parsed.
+Either a response-handler callable or an import-string to a response-handler callable.
+"""

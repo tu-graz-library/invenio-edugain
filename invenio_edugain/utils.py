@@ -12,12 +12,14 @@ import string
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from os import PathLike
+from secrets import token_hex
 from tempfile import NamedTemporaryFile
 from typing import Any, Literal, Self, TypedDict, TypeGuard
 
 import requests
 import validators
-from flask import current_app
+from flask import current_app, redirect
+from flask_security import login_user
 from flask_security.registerable import register_user
 from invenio_accounts.models import User, UserIdentity
 from invenio_db import db
@@ -30,6 +32,7 @@ from saml2.mdstore import InMemoryMetaData, MetadataStore
 from saml2.response import AuthnResponse
 from sqlalchemy import true
 from uritools import uricompose, urisplit
+from werkzeug.wrappers import Response as BaseResponse
 
 from .models import IdPData
 
@@ -365,3 +368,25 @@ def secure_redirect_url(unsafe_url: str) -> str:
         return security_url
 
     return "/"
+
+
+def default_authn_response_handler(
+    authn_info: AuthnInfo,
+    next_url: str,
+) -> BaseResponse:
+    """Handle authn-response by creating uncreated accounts and then logging them in."""
+    if authn_info.user is None:
+        # no user found in db, create one
+        # to prevent name collisions of users with same name, use random username instead
+        # we never show username to other users anyway...
+        # 16 bytes means chance of collisions is virtually 0 up to about 10**15 users
+        authn_info.suggested_username = "user-" + token_hex(nbytes=16)
+        authn_info.user = create_user(authn_info)
+
+    if not login_user(authn_info.user):
+        # user.active is False, hence wasn't logged in
+        msg = "User was blocked/deactivated"
+        raise AuthnResponseError(msg)
+    current_app.extensions["security"].datastore.commit()
+
+    return redirect(next_url or current_app.config["SECURITY_POST_LOGIN_VIEW"])
