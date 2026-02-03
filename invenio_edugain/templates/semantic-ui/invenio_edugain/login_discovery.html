@@ -16,7 +16,7 @@
 
 {% block css %}
   {{ super() }}
-  {{ webpack['invenio-edugain-eds-less.css'] }}
+  {{ webpack[config.EDUGAIN_DISCOVERY_CSS] }}
 {% endblock css %}
 
 {% block page_body %}
