@@ -217,3 +217,42 @@ def url_for_server(app: Flask, server_name: str | None, endpoint: str) -> str:
                 "_external": None,
             },
         )
+
+
+class UninitializedConfigError(Exception):
+    """Error raised when configuration wasn't initialized."""
+
+
+class UninitializedConfig:
+    """Class for when config isn't correctly initialized. Raises on any operation."""
+
+    def __init__(self, error: Exception) -> None:
+        """Init."""
+        # since type(self).__setattr__ was overwritten to fail, need to explicitly call object.__setattr__ here
+        # manual name-mangling for private .__error attribute
+        object.__setattr__(self, "_UninitializedConfig__error", error)
+
+    def __raise_error(self, *args: Any, **kwargs: Any) -> Any:  # noqa: ARG002, ANN401
+        msg = "attempted to operate on uninitialized config"
+        raise UninitializedConfigError(msg) from self.__error  # type: ignore[attr-defined]
+
+    # attribute access handling methods
+    __getattr__ = __raise_error
+    __setattr__ = __raise_error
+    __delattr__ = __raise_error
+
+    # MutableMapping interface
+    __contains__ = __raise_error
+    __iter__ = __raise_error
+    __len__ = __raise_error
+    __getitem__ = __raise_error
+    __setitem__ = __raise_error
+    __delitem__ = __raise_error
+    __eq__ = __raise_error
+    __ne__ = __raise_error
+
+    __or__ = __raise_error
+    __ror__ = __raise_error
+    __ior__ = __raise_error
+    __reversed__ = __raise_error
+    __hash__ = __raise_error

@@ -18,6 +18,7 @@ from .pysaml2_core import (
     Pysaml2ConfigCoreUIInfo,
 )
 from .shibboleth import build_shibboleth_eds_config
+from .utils import UninitializedConfig
 
 __all__ = (
     "Pysaml2ConfigCore",
@@ -27,6 +28,7 @@ __all__ = (
     "Pysaml2ConfigCoreOrganization",
     "Pysaml2ConfigCoreProvidedService",
     "Pysaml2ConfigCoreUIInfo",
+    "UninitializedConfig",
     "build_pysaml2_config",
     "build_shibboleth_eds_config",
 )

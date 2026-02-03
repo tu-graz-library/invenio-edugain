@@ -7,6 +7,7 @@
 
 """Configuration for invenio-edugain."""
 
+from .build_config import UninitializedConfig
 from .build_config.shibboleth import ShibbolethEDSKwargs
 
 EDUGAIN_ALLOW_IMGSRC_CSP: bool | None = None
@@ -31,7 +32,11 @@ EDUGAIN_ROUTES = {
 #
 # Configuration for pysaml2 and shibboleth-eds
 #
-EDUGAIN_PYSAML2_CONFIG: dict[str, str | list | dict] | None = None
+pysaml2_config_error_msg = """config-var `EDUGAIN_PYSAML2_CONFIG` was never set
+if you turned off automatic config-building, be sure to set it yourself"""
+EDUGAIN_PYSAML2_CONFIG: dict[str, str | list | dict] | UninitializedConfig = (
+    UninitializedConfig(ValueError(pysaml2_config_error_msg))
+)
 """After app-finalization, this must be set to a dict loadable by `pysaml2.config:Config.load`.
 You will usually want to build this using the machinery in `invenio_edugain.build_config`.
 See pysaml2's "Configuration of PySAML2 entities" documentation for advanced configuration needs.
