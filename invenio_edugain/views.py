@@ -8,7 +8,6 @@
 """invenio-edugain views."""
 
 from collections import defaultdict
-from secrets import token_hex
 from xml.etree import ElementTree as ET
 
 from flask import (
@@ -21,7 +20,7 @@ from flask import (
     render_template,
     request,
 )
-from flask_security import login_user
+from invenio_base.utils import load_or_import_from_config
 from invenio_db import db
 from invenio_i18n.proxies import current_i18n
 from invenio_oauthclient.utils import get_safe_redirect_target
@@ -36,7 +35,6 @@ from .utils import (
     NS_PREFIX,
     AuthnInfo,
     AuthnResponseError,
-    create_user,
     secure_redirect_url,
 )
 
@@ -216,21 +214,9 @@ def acs() -> BaseResponse:
         raise AuthnResponseError(msg)
 
     authn_info = AuthnInfo.from_saml_response(saml_response)
-    if authn_info.user is None:
-        # no user found in db, create one
-        # to prevent name collisions of users with same name, use random username instead
-        # we never show username to other users anyway...
-        # 16 bytes means chance of collisions is virtually 0 up to about 10**15 users
-        authn_info.suggested_username = "user-" + token_hex(nbytes=16)
-        authn_info.user = create_user(authn_info)
 
-    if not login_user(authn_info.user):
-        # user.active is False, hence wasn't logged in
-        msg = "User was blocked/deactivated"
-        raise AuthnResponseError(msg)
-    current_app.extensions["security"].datastore.commit()
-
-    return redirect(next_url or current_app.config["SECURITY_POST_LOGIN_VIEW"])
+    response_handler = load_or_import_from_config("EDUGAIN_AUTHN_RESPONSE_HANDLER")
+    return response_handler(authn_info, next_url)
 
 
 def create_blueprint(app: Flask) -> Blueprint:
