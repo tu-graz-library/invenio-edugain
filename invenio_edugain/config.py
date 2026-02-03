@@ -14,7 +14,9 @@ from werkzeug.wrappers import Response
 from .build_config import UninitializedConfig
 from .build_config.shibboleth import ShibbolethEDSKwargs
 from .utils import (
+    NOT_CONFIGURED,
     AuthnInfo,
+    NotConfiguredType,
     default_authn_response_handler,
 )
 
@@ -77,6 +79,13 @@ Only used in automatic config-building.
 #
 # Configuration for discovery service
 #
+EDUGAIN_DISCOVERY_ADDITION_REQUEST_EMAIL: str | None | NotConfiguredType = (
+    NOT_CONFIGURED
+)
+"""Email for requesting an institution be added to the list of discoverable IdPs.
+Set to `None` to turn this off.
+"""
+
 EDUGAIN_DISCOVERY_CSS: str = "invenio-edugain-eds-less.css"
 """CSS used on discovery page (i.e. the *choose your institution to log in with* page ).
 Set to configured webpack key.

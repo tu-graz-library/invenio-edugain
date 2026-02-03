@@ -45,12 +45,35 @@ class _ABSENT(enum.Enum):
     def __repr__(self) -> str:
         return "ABSENT"
 
+    def __str__(self) -> str:
+        return "ABSENT"
+
     def __bool__(self) -> Literal[False]:
         return False
 
 
 ABSENT = _ABSENT.ABSENT
 type AbsentType = Literal[_ABSENT.ABSENT]
+
+
+class _NOT_CONFIGURED(enum.Enum):  # noqa: N801
+    """Sentinel for unconfigured vars."""
+
+    NOT_CONFIGURED = enum.auto()
+
+    def __repr__(self) -> str:
+        return "NOT_CONFIGURED"
+
+    def __str__(self) -> str:
+        return "NOT_CONFIGURED"
+
+    def __bool__(self) -> bool:
+        return False
+
+
+NOT_CONFIGURED = _NOT_CONFIGURED.NOT_CONFIGURED
+type NotConfiguredType = Literal[_NOT_CONFIGURED.NOT_CONFIGURED]
+
 
 NS_PREFIX = {
     "alg": "urn:oasis:names:tc:SAML:metadata:algsupport",
