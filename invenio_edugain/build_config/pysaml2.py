@@ -83,7 +83,8 @@ def build_pysaml2_config(
     ]
 
     return {
-        "accepted_time_diff": 60,  # IdPs' clock may drift from our server's clock by this many seconds
+        "accepted_time_diff": 4
+        * 60,  # IdPs' clock may drift from our server's clock by this many seconds, default-value as per saml2int [SDP-G01]
         "allow_unknown_attributes": True,  # IdPs can send wildly different attributes, allow all of them to appear in parsed output
         "contact_person": contacts,
         "description": (
@@ -164,20 +165,20 @@ def build_sp(app: Flask, core_config: Pysaml2ConfigCore) -> dict[str, JSONplusTu
     ui_info["logo"] = list(core_config.ui_info.logos)  # type: ignore[arg-type]  # type is correct as it is checked at initialization of .logos, but mypy can't tell
 
     return {
-        "allow_unsolicited": True,
+        "allow_unsolicited": True,  # whether to allow authn-responses with no prior authn-request
         "authn_requests_signed": False,
         "digest_algorithm": DIGEST_SHA256,
         "endpoints": {
             "assertion_consumer_service": acs_endpoints,
         },
-        "force_authn": False,
-        "name_id_format_allow_create": True,
+        "force_authn": False,  # whether to force IdP to ask user-credentials again (e.g. if they are already logged into their SSO, whether to require re-authentication)
+        "name_id_format_allow_create": True,  # whether IdP may create a new ID of NameID format exists for user yet
         "optional_attributes": [
             "eduPersonPrincipalName",
             "eduPersonScopedAffiliation",
         ],
         "signing_algorithm": SIG_RSA_SHA256,
-        "requested_attributes": [],
+        "requested_attributes": [],  # required attributes are present due to edugain requirements requiring IdPs to send them - no need to explicitly request them here
         "required_attributes": [
             "displayName",
             "givenName",
@@ -185,7 +186,8 @@ def build_sp(app: Flask, core_config: Pysaml2ConfigCore) -> dict[str, JSONplusTu
             "sn",
         ],
         "ui_info": ui_info,
+        # which part of the response needs be digitally signed? - the whole response, just the assertions, or at least one of them
         "want_assertions_signed": False,
-        "want_assertions_or_response_signed": True,
+        "want_assertions_or_response_signed": True,  # either one being signed guarantees assertions' authenticity and integrity
         "want_response_signed": False,
     }
