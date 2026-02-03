@@ -47,7 +47,7 @@ def login_discover() -> str:
     shibboleth_eds_config["selectedLanguage"] = current_i18n.language
 
     return render_template(
-        "invenio_edugain/login_discovery.html",
+        current_app.config["EDUGAIN_DISCOVERY_TEMPLATE"],
         shibboleth_eds_config=shibboleth_eds_config,
     )
 
