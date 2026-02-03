@@ -32,6 +32,21 @@
           <div id="idpSelect" data-shibboleth-eds-config='{{ shibboleth_eds_config | tojson }}'>
             <!-- content is provided by shibboleth-eds -->
           </div>
+          {% if config.EDUGAIN_DISCOVERY_CONTACT_EMAIL is not none %}
+            <div style="margin-top: 1rem; text-align: left; width: 600px;">
+              <details>
+                <summary>
+                  "Why isn't my institution showing?"
+                </summary>
+                <p>
+                  "To ensure security of the platform, organizations are only added after our IT team found them to be secure."
+                  <br>
+                  "To get your organization white-listed, send an email to our IT team:"
+                  <a href="mailto:{{ config.EDUGAIN_DISCOVERY_ADDITION_REQUEST_EMAIL }}">{{ config.EDUGAIN_DISCOVERY_ADDITION_REQUEST_EMAIL }}</a>
+                </p>
+              </details>
+            </div>
+          {% endif %}
         </div>
       </div>
     </div>
