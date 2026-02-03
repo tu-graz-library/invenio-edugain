@@ -148,7 +148,7 @@ sp_config_dict = {
 
 
 expected_sample_config = {
-    "accepted_time_diff": 60,  # IdPs' clock may drift from our server's clock by this many seconds
+    "accepted_time_diff": 240,  # IdPs' clock may drift from our server's clock by this many seconds
     "allow_unknown_attributes": True,  # IdPs can send wildly different attributes, allow all of them to appear in parsed output
     "contact_person": [
         {
