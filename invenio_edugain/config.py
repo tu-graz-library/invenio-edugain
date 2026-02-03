@@ -62,3 +62,9 @@ EDUGAIN_SHIBBOLETH_EDS_CONFIG_KWARGS: ShibbolethEDSKwargs | None = None
 """Provide additional kwargs for shibbleth-eds-config.
 Only used in automatic config-building.
 """
+
+
+EDUGAIN_DISCOVERY_CSS: str = "invenio-edugain-eds-less.css"
+"""CSS used on discovery page (i.e. the *choose your institution to log in with* page ).
+Set to configured webpack key.
+"""
