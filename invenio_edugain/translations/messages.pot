@@ -1,0 +1,90 @@
+# Translations template for invenio-edugain.
+# Copyright (C) 2026 Graz University of Technology
+# This file is distributed under the same license as the invenio-edugain
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: invenio-edugain 0.0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-02-09 11:15+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: invenio_edugain/jobs.py:26
+msgid "URL/filepath to xml with SAML metadata"
+msgstr ""
+
+#: invenio_edugain/jobs.py:28
+msgid "SAML metadata location"
+msgstr ""
+
+#: invenio_edugain/jobs.py:36
+msgid ""
+"URL/filepath to certificate for SAML metadata (only necessary when "
+"loading metadata from url)"
+msgstr ""
+
+#: invenio_edugain/jobs.py:38
+msgid "certificate location"
+msgstr ""
+
+#: invenio_edugain/jobs.py:45
+msgid ""
+"SHA256 fingerprint of the certificate (only necessary when loading "
+"certificate from url)"
+msgstr ""
+
+#: invenio_edugain/jobs.py:47
+msgid "SHA256 fingerprint of cert"
+msgstr ""
+
+#: invenio_edugain/jobs.py:61
+msgid "Ingests IdP data from given file/URL into db"
+msgstr ""
+
+#: invenio_edugain/jobs.py:64
+msgid "edugain/SAML: ingest identity provider data"
+msgstr ""
+
+#: invenio_edugain/templates/semantic-ui/invenio_edugain/login_discovery.html:31
+msgid "Find your institution"
+msgstr ""
+
+#: invenio_edugain/templates/semantic-ui/invenio_edugain/login_discovery.html:40
+msgid "Why isn't my institution showing?"
+msgstr ""
+
+#: invenio_edugain/templates/semantic-ui/invenio_edugain/login_discovery.html:43
+msgid ""
+"To ensure security of the platform, organizations are only added after "
+"our IT team found them to be secure."
+msgstr ""
+
+#: invenio_edugain/templates/semantic-ui/invenio_edugain/login_discovery.html:45
+msgid "To get your organization white-listed, send an email to our IT team:"
+msgstr ""
+
+#: invenio_edugain/templates/semantic-ui/invenio_edugain/login_user.html:18
+msgid "Log in with edugain"
+msgstr ""
+
+#: invenio_edugain/templates/semantic-ui/invenio_edugain/login_user.html:24
+msgid "OR"
+msgstr ""
+
+#: invenio_edugain/templates/semantic-ui/invenio_edugain/login_user.html:35
+msgid "Forgot password?"
+msgstr ""
+
+#: invenio_edugain/templates/semantic-ui/invenio_edugain/login_user.html:41
+msgid "Resend confirmation email"
+msgstr ""
+

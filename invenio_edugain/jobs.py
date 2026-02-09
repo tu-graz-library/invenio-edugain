@@ -9,6 +9,7 @@
 
 from datetime import datetime
 
+from invenio_i18n import lazy_gettext as _
 from invenio_jobs.jobs import JobType
 from invenio_jobs.models import Job
 from marshmallow import Schema, fields
@@ -22,24 +23,28 @@ class IngestIdPDataArgsSchema(Schema):
 
     metadata_xml_location = fields.String(
         metadata={
-            "description": "URL/filepath to xml with SAML metadata",  # TODO: translate
+            "description": _("URL/filepath to xml with SAML metadata"),
             # note that lodash.capitalize will be called on the title:
-            "title": "SAML metadata location",  # TODO: translate
+            "title": _("SAML metadata location"),
         },
         required=True,
     )
     cert_location = fields.String(
         allow_none=True,
         metadata={
-            "description": "URL/filepath to certificate for SAML metadata (only necessary when loading metadata from url)",  # TODO: translate
-            "title": "certificate location",  # TODO: translate
+            "description": _(
+                "URL/filepath to certificate for SAML metadata (only necessary when loading metadata from url)",
+            ),
+            "title": _("certificate location"),
         },
     )
     fingerprint_sha256 = fields.String(
         allow_none=True,
         metadata={
-            "description": "SHA256 fingerprint of the certificate (only necessary when loading certificate from url)",  # TODO: translate
-            "title": "SHA256 fingerprint of cert",  # TODO: translate
+            "description": _(
+                "SHA256 fingerprint of the certificate (only necessary when loading certificate from url)",
+            ),
+            "title": _("SHA256 fingerprint of cert"),
         },
     )
     job_arg_schema = fields.String(
@@ -53,10 +58,10 @@ class IngestIdPDataJob(JobType):
     """Job for ingesting IdP data into database."""
 
     arguments_schema = IngestIdPDataArgsSchema
-    description = "Ingests IdP data from given file/URL into db"  # TODO: translate
+    description = _("Ingests IdP data from given file/URL into db")
     id = "ingest_idp_data"
     task = ingest_idp_data
-    title = "edugain/SAML: ingest identity provider data"
+    title = _("edugain/SAML: ingest identity provider data")
 
     @classmethod
     def build_task_arguments(
