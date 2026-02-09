@@ -6,20 +6,42 @@
 > This is explicitly mentioned in file-headers where applicable.
 > An Apache 2.0 license is provided in the relevant subdirectory.
 
-> [!WARNING]
-> This package is not implemented yet.
->
-> It's at the top of our priority list and actively being worked on though.
-
 `invenio-edugain` implements an easy way to add login via edugain to your invenio instance.
 
 ## Contents of this README
 
+- [Overview of edugain](#overview-of-edugain)
 - [Features](#features)
-- [Installation](#installation)
-- [Configuration](#configuration)
+- [Setup](#setup)
+- [Advanced Configuration](#advanced-configuration)
   - [SAML (i.e. the underlying authentication-data exchange protocol)](#configuration-of-saml)
   - [Discovery service (i.e. the _select your institution_ webpage)](#configuration-of-discovery-service)
+
+## Overview of edugain
+
+To fill in the form for registering your invenio instance for use with edugain, it's necessary to have basic knowledge about terminology and inner workings.
+This section quickly summarizes that.
+
+`Secure Assertion Markup Language (SAML)`: a standard for authenticating users, build on XML
+
+By SAML's HTTP-POST protocol, authentication involves two servers and a user, and works as follows:
+1. user wants to log into server #1
+2. on the server #1 website, user choses to authenticate themselves via server #2
+3. server #1 redirects user to server #2's login page
+   (the redirect contains a SAML authentication request as URL parameter)
+4. user authenticates themselves on server #2
+5. server #2 builds a SAML authentication response and makes user POST that to server #1
+6. the authentication response includes email/name/... (encryptedly) which allows server #1 to log in the user
+
+`Service Provider (SP)`: within the above protocol, the party that sends SAML authentication requests (i.e. server #1)
+
+`Identity Provider (IdP)`: within the above protocol, the party that responds to SAML authentication requests with SAML authentication responses (i.e. server #2)
+
+`Identity Federation`: a federation of multiple organizations, each of which provides identit(ies) and/or service(s) (i.e. a bunch of orgs, all of which run an SP server and/or IdP server)
+
+`Inter-Federation`: a federation made up of multiple different federations
+
+`edugain`: an inter-federation of >80 federations, containing >8000 IdPs/SPs between its members
 
 ## Features
 
@@ -30,12 +52,20 @@
   - included config-building machinery can build basic configuration
   - for advanced use cases, all configuration fields of the underlying `pysaml2` and `shibboleth EDS` are accessible
 
-## Installation
+## Setup
+
+### 1. install the package, its tables, and its assets
 
 Use your package installer to install `invenio_edugain`, e.g. via `pip`:
 
 ```bash
 pip install invenio_edugain
+```
+
+Use `invenio-cli` to rebuild assets s.t. `invenio-edugain`'s assets are built:
+
+```bash
+invenio-cli assets build
 ```
 
 When creating a new invenio instance, `invenio_edugain`'s SQL-tables will automatically be created with all the other tables.
@@ -45,7 +75,85 @@ When adding to an existing instance, you'll have to create the new SQL-tables us
 invenio alembic upgrade
 ```
 
-## Configuration
+### 2. provide necessary configuration
+
+The following MUST be configured before `invenio-edugain` is usable:
+
+| config variable name                       | example values                                                                      | notes                                                                                                                                                                          |
+| ------------------------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `EDUGAIN_GEANT_COC_COMPLIANT`              | `True`, `False`                                                                     | claims compliance with [GÉANT's _data protection code of conduct_](https://geant3plus.archive.geant.net/Documents/GEANT_DP_CoC_ver1.0.pdf)<br>some IdPs will only work if this is set<br>note that this may have legal consequences, so make sure your service complies before setting this |
+| `EDUGAIN_REFEDS_COMPLIANT`                 | `True`, `False`                                                                     | claims compliance with [REFEDS's _research and scholarship_](https://refeds.org/category/research-and-scholarship)<br>educational institutions will want this<br>note that this may have legal consequences, so make sure your service complies before setting this |
+| `EDUGAIN_CONTACT_SECURITY_EMAIL`           | `"repository-support@foo.org"`                                                      | for security incident response                                                                                                                                                 |
+| `EDUGAIN_CONTACT_SECURITY_GIVEN_NAME`      | `"Security"`                                                                        | for security incident response                                                                                                                                                 |
+| `EDUGAIN_CONTACT_SECURITY_SUR_NAME`        | `"Contact"`                                                                         | for security incident response                                                                                                                                                 |
+| `EDUGAIN_CONTACT_SUPPORT_EMAIL`            | `"repository-support@foo.org"`                                                      | for technical support                                                                                                                                                          |
+| `EDUGAIN_CONTACT_SUPPORT_GIVEN_NAME`       | `"Technical"`                                                                       | for technical support                                                                                                                                                          |
+| `EDUGAIN_CONTACT_SUPPORT_SUR_NAME`         | `"Support"`                                                                         | for technical support                                                                                                                                                          |
+| `EDUGAIN_ENCRYPTION_CERT`                  | `"/abs/path/to/encryption.crt"`, `"rel/path/to/encryption.crt"`                     | see [below](#3-create-certificates-for-secure-data-exchange)                                                                                                                   |
+| `EDUGAIN_ENCRYPTION_KEY`                   | `"/path/to/encryption.key"`                                                         | see [below](#3-create-certificates-for-secure-data-exchange)                                                                                                                   |
+| `EDUGAIN_SIGNING_CERT`                     | `"/path/to/signing.crt"`                                                            | see [below](#3-create-certificates-for-secure-data-exchange)                                                                                                                   |
+| `EDUGAIN_SIGNING_KEY`                      | `"/path/to/signing.key"`                                                            | see [below](#3-create-certificates-for-secure-data-exchange)                                                                                                                   |
+| `EDUGAIN_ORG_DISPLAYNAMES_BY_LANG`         | `{"en": "Foo University"}`                                                          | provide at least english                                                                                                                                                       |
+| `EDUGAIN_ORG_NAMES_BY_LANG`                | `{"en": "Foo University"}`                                                          | provide at least english                                                                                                                                                       |
+| `EDUGAIN_ORG_URLS_BY_LANG`                 | `{"en": "https://www.foo.org"}`                                                     | provide at least english                                                                                                                                                       |
+| `EDUGAIN_MAIN_SERVER_DOMAIN`               | `"https://repo.foo.org"`                                                            |                                                                                                                                                                                |
+| `EDUGAIN_OTHER_SERVER_DOMAINS`             | `["https://test.repo.foo.org"]`                                                     |                                                                                                                                                                                |
+| `EDUGAIN_SERVICE_DESCRIPTION_EN`           | `"The Foo Repository is ..."`                                                       |                                                                                                                                                                                |
+| `EDUGAIN_SERVICE_NAME_EN`                  | `"Foo Repository"`                                                                  |                                                                                                                                                                                |
+| `EDUGAIN_UIINFO_DESCRIPTIONS_BY_LANG`      | `{"en": "The Foo Repo..."}`                                                         | provide at least english                                                                                                                                                       |
+| `EDUGAIN_UIINFO_DISPLAYNAMES_BY_LANG`      | `{"en": "Foo Repository"}`                                                          | provide at least english                                                                                                                                                       |
+| `EDUGAIN_UIINFO_LOGOS`                     | `[{"height": "177", "width": "177",`<br>`"text": "https://repo.foo.org/logo.png"}]` | provide at least one logo with `height == width`<br>logo-dict may have a `"lang"` key, in that case provide at least one logo without `"lang"` or one logo with `"lang": "en"` |
+| `EDUGAIN_UIINFO_PRIVACY_URLS_BY_LANG`      | `{"en": "https://repo.foo.org/GDPR_en.pdf"}`                                        | provide at least english                                                                                                                                                       |
+| `EDUGAIN_UIINFO_INFO_URLS_BY_LANG`         | `{"en": "https://repo.foo.org/"}`                                                   | provide at least english                                                                                                                                                       |
+| `EUDGAIN_ALLOW_IMGSRC_CSP`                 | `True`, `False`                                                                     | whether to allow showing logos on _choose your institution to log in with_ page<br>this requires a CSP update, so you have to opt into it                                      |
+| `EDUGAIN_DISCOVERY_ADDITION_REQUEST_EMAIL` | `"support@repo.foo.org"`, `None`                                                    | shown on _choose your on institution_ page as contact for requesting an organization be made loginable-with<br>set to `None` to turn this off                                  |
+
+### 3. create certificates for secure data exchange
+
+Trust in these certificates is established by your local edugain representative checking them before distributing them to IdPs.
+Thus self-signed certificates suffice.
+The following command creates pairs of self-signed public/private keys.
+Do note that some edugain representatives make additional requirements for this, e.g. Germany's DFN-AAI requires `-days` be at most 5 years.
+Also note that your organization's security policies might add requirements for this.
+
+```bash
+openssl req -x509 -new -newkey rsa:4096 -noenc -keyout encryption.key -out encryption.crt -days 3650
+openssl req -x509 -new -newkey rsa:4096 -noenc -keyout siginng.key    -out signing.crt    -days 3650
+```
+
+> [!NOTE]
+> When generating certificates with above command, you will be asked for some additional metadata.
+> These certificates will be wrapped in SAML XML - which adds metadata from above configuration.
+> Metadata you input here will be ignored in favor of that.
+> Best practice is to blank most fields (by entering `.`), except for
+> the CN field - which must be given, for that use your server's FQDN (e.g. `repo.foo.org`)
+
+### 4. ingest IdP metadata
+
+To authenticate via some IdP, we need to ingest their metadata.
+Metadata of edugain's IdPs is provided under some URL by your local edugain representative.
+
+Find the representative responsible for your area at [https://technical.edugain.org/status](https://technical.edugain.org/status).
+Then find the metadata URL on your represenative's website.
+
+`invenio-edugain`'s metadata ingestion can be run via the _jobs_ view in the administration UI:
+1. create a new job for the task `edugain/SAML: ingest identity provider data`, check `Active`
+2. edit the created job and fill in the args `Saml metadata location`, `Certificate location`, and `Sha256 fingerprint of cert`
+   (all of them should be shown on the same webpage as the metadata URL)
+3. schedule the job to run at least once per day
+
+### 5. register your service with edugain
+
+Registration procedure differs widely depending on your local edugain representative, and information is often spread over multiple web-sites.  
+Hence it's probably easiest to contact your representative via email and ask for guidance.  
+Ask them about the procedure/requirements to _register your service as a new Service Provider (SP)_.
+
+Find your local edugain-representative (amd their contact email) here: [https://technical.edugain.org/status](https://technical.edugain.org/status)
+
+At some point, they will likely require your configuration in form of a `SAML metadata XML`.
+After correct configuration, such XML is made available under the URL `<host>/saml/sp/xml` (per default at least - overwritable with `EDUGAIN_ROUTES["sp-xml"]`).
+
+## Advanced Configuration
 
 ### Configuration of SAML
 
@@ -177,15 +285,6 @@ def finalize_app(app):
 
     # don't forget to set `EDUGAIN_SHIBBOLETH_EDS_CONFIG`
     app.config["EDUGAIN_SHIBBOLETH_EDS_CONFIG"] = shibboleth_eds_config
-```
-
-## `invenio-jobs` integration
-
-`invenio-edugain`'s idp-data ingestion can be run via the _jobs_ view in the administration UI.
-Note that the _jobs_ view is hidden by default, enable it via adding the following configuration:
-
-```python
-JOBS_ADMINISTRATION_ENABLED = True
 ```
 
 <!-- TODO: link to invenio-jobs documentation once it was written -->
