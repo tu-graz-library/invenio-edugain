@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2025 Graz University of Technology.
+# Copyright (C) 2025-2026 Graz University of Technology.
 #
 # invenio-edugain is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -9,7 +9,7 @@
 
 from .ext import InvenioEdugain
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 
 __all__ = (
     "InvenioEdugain",
