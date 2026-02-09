@@ -1,19 +1,23 @@
-# invenio-edugain
+=================
+ invenio-edugain
+=================
 
-> [!NOTE]
-> Most of this package is licensed under the MIT license.
-> However, it also contains code from _Shibboleth Consortium_, which is licensed under Apache 2.0.
-> This is explicitly mentioned in file-headers where applicable.
-> An Apache 2.0 license is provided in the relevant subdirectory.
 
-> [!WARNING]
-> This package is not implemented yet.
->
-> It's at the top of our priority list and actively being worked on though.
+| [!NOTE]
+| Most of this package is licensed under the MIT license.
+| However, it also contains code from _Shibboleth Consortium_, which is licensed under Apache 2.0.
+| This is explicitly mentioned in file-headers where applicable.
+| An Apache 2.0 license is provided in the relevant subdirectory.
+
+| [!WARNING]
+| This package is not implemented yet.
+|
+| It's at the top of our priority list and actively being worked on though.
 
 `invenio-edugain` implements an easy way to add login via edugain to your invenio instance.
 
-## Contents of this README
+Contents of this README
+=======================
 
 - [Features](#features)
 - [Installation](#installation)
@@ -21,7 +25,8 @@
   - [SAML (i.e. the underlying authentication-data exchange protocol)](#configuration-of-saml)
   - [Discovery service (i.e. the _select your institution_ webpage)](#configuration-of-discovery-service)
 
-## Features
+Features
+--------
 
 - discovery service (i.e. a _Select your institution to login with_ webpage)
 - load metadata (i.e. name/cryptographic credentials of other institutions) via `invenio-jobs`
@@ -30,7 +35,8 @@
   - included config-building machinery can build basic configuration
   - for advanced use cases, all configuration fields of the underlying `pysaml2` and `shibboleth EDS` are accessible
 
-## Installation
+Installation
+------------
 
 Use your package installer to install `invenio_edugain`, e.g. via `pip`:
 
@@ -45,19 +51,21 @@ When adding to an existing instance, you'll have to create the new SQL-tables us
 invenio alembic upgrade
 ```
 
-## Configuration
-
-### Configuration of SAML
+Configuration of SAML
+--------------------
 
 To securely exchange authentication data, _edugain_ uses the SAML protocol.
 `invenio-edugain` uses for its SAML protocol implementation `pysaml2`.
 The important thing when configuring `pysaml2` is this:
 
-> _After app-finalization, `app.config["EDUGAIN_PYSAML2_CONFIG"]` MUST be a valid `pysaml2` config dict._
->
-> (we don't care _how_ you compute the `pysaml2` config - hardcoding, using config-builder, computing it yourself, or any combination thereof will work - just remember to set the computed config to `EDUGAIN_PYSAML2_CONFIG` before app-finalization)
+| After app-finalization, `app.config["EDUGAIN_PYSAML2_CONFIG"]` MUST be
+| a valid `pysaml2` config dict._ (we don't care _how_ you compute the
+| `pysaml2` config - hardcoding, using config-builder, computing it
+| yourself, or any combination thereof will work - just remember to set
+| the computed config to `EDUGAIN_PYSAML2_CONFIG` before
+| app-finalization)
 
-For available configuration fields, see [`pysaml2` docs](https://pysaml2.readthedocs.io/en/latest/howto/config.html).  
+For available configuration fields, see [`pysaml2` docs](https://pysaml2.readthedocs.io/en/latest/howto/config.html).
 For ways to setup a `pysaml2` configuration, read on.
 
 Per default, `invenio-edugain` attempts to setup `EDUGAIN_PYSAML2_CONFIG` automatically from some `EDUGAIN_*` config-vars.
@@ -121,22 +129,23 @@ EDUGAIN_PYSAML2_CONFIG_BUILDING_ENABLED = False
 EDUGAIN_PYSAML2_CONFIG = {...}  # set to a pysaml2 config-dict
 ```
 
-### Configuration of discovery service
+Configuration of discovery service
+----------------------------------
 
 Users need to be able to select the institution they wish to login with.
 A webpage on which users can make such selection is called a _discovery service_.
 `invenio-edugain` vendors _`shibboleth-EDS` (embedded discovery service)_ for this.
 The important thing when configuring `shibboleth-EDS` is this:
 
-> _After app-finalization, `app.config["EDUGAIN_SHIBBOLETH_EDS_CONFIG"]` MUST be a valid shibboleth-eds config dict._
->
-> (we don't care _how_ you compute the `shibboleth-EDS` config - hardcoding, using config-builder, computing it yourself, or any combination thereof will work - just remember to set the computed config to `EDUGAIN_SHIBBOLETH_EDS_CONFIG` before app-finalization)
+| _After app-finalization, `app.config["EDUGAIN_SHIBBOLETH_EDS_CONFIG"]` MUST be a valid shibboleth-eds config dict._
+|
+| (we don't care _how_ you compute the `shibboleth-EDS` config - hardcoding, using config-builder, computing it yourself, or any combination thereof will work - just remember to set the computed config to `EDUGAIN_SHIBBOLETH_EDS_CONFIG` before app-finalization)
 
-For available configuration fields, see [`shibboleth-EDS` docs](https://shibboleth.atlassian.net/wiki/spaces/EDS10/pages/2383446048/3.2+EDS+Configuration+Options).  
-For defaults, see the vendored [`idpselect_config.js`](./invenio_edugain/assets/semantic-ui/shibboleth-embedded-ds-1.3.0/nonminimised/idpselect_config.js) (note that the configuration-field `selectedLanguage` is instead controlled via `current_i18n.language`).  
+For available configuration fields, see [`shibboleth-EDS` docs](https://shibboleth.atlassian.net/wiki/spaces/EDS10/pages/2383446048/3.2+EDS+Configuration+Options).
+For defaults, see the vendored [`idpselect_config.js`](./invenio_edugain/assets/semantic-ui/shibboleth-embedded-ds-1.3.0/nonminimised/idpselect_config.js) (note that the configuration-field `selectedLanguage` is instead controlled via `current_i18n.language`).
 For ways to setup a `shibboleth-EDS` config, read on.
 
-Per default, `invenio-edugain` automatically sets up a basic `EDUGAIN_SHIBBOLETH_EDS_CONFIG`.  
+Per default, `invenio-edugain` automatically sets up a basic `EDUGAIN_SHIBBOLETH_EDS_CONFIG`.
 When using automatic building, `EDUGAIN_SHIBBOLETH_EDS_CONFIG_KWARGS` can be used to selectively overwrite config-fields.
 
 ```python
@@ -151,7 +160,7 @@ EDUGAIN_SHIBBOLETH_EDS_CONFIG_KWARGS = {
 ```
 
 Alternatively, you may turn off automatic setup of `EDUGAIN_SHIBBOLETH_EDS_CONFIG` (and set it yourself instead)
-by setting `EDUGAIN_SHIBBOLETH_EDS_CONFIG_BUILDING_ENABLED` to `False` (in your invenio.cfg file).  
+by setting `EDUGAIN_SHIBBOLETH_EDS_CONFIG_BUILDING_ENABLED` to `False` (in your invenio.cfg file).
 In that case, set `EDUGAIN_SHIBBOLETH_EDS_CONFIG` yourself.
 You may (but need not) re-use config-builder machinery for this:
 
@@ -179,7 +188,8 @@ def finalize_app(app):
     app.config["EDUGAIN_SHIBBOLETH_EDS_CONFIG"] = shibboleth_eds_config
 ```
 
-## `invenio-jobs` integration
+`invenio-jobs` integration
+--------------------------
 
 `invenio-edugain`'s idp-data ingestion can be run via the _jobs_ view in the administration UI.
 Note that the _jobs_ view is hidden by default, enable it via adding the following configuration:
@@ -190,7 +200,8 @@ JOBS_ADMINISTRATION_ENABLED = True
 
 <!-- TODO: link to invenio-jobs documentation once it was written -->
 
-## invenio-edugain at Invenio RDM Meeting 2025
+invenio-edugain at Invenio RDM Meeting 2025
+-------------------------------------------
 
 Our team was present at the Invenio RDM Meeting 2025 ([invitation](https://herrner.github.io/irdm2025/), [indico](https://www.conferences.uni-hamburg.de/event/548/overview)).
 One of the [discussed topics](https://uhh.de/fdm-irdm25) was edugain ([write-up](https://pad.uni-hamburg.de/zVH2FSxTTJeSIq6uHAUgGA#)).
