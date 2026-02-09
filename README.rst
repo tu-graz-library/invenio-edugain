@@ -289,6 +289,25 @@ def finalize_app(app):
 
 <!-- TODO: link to invenio-jobs documentation once it was written -->
 
+## translations
+
+For extracting messages into a .pot file:
+
+1. make sure your current python environment has the `babel` package installed  
+   (`babel` is part of the `invenio` stack - your invenio virtual-environment should work)
+
+2. find the current `invenio-edugain` version in `./invenio-edugain/__init__.py`  
+   (the value of the `version` variable near the top of the file)
+
+3. run the following command with `--version` set to the current version of `invenio-edugain`:
+
+```bash
+pybabel extract --copyright-holder "Graz University of Technology" --mapping-file pyproject.toml --output-file invenio_edugain/translations/messages.pot --add-comments NOTE --project invenio-edugain --version "<version here>" invenio_edugain/
+```
+
+For now, `babel` commands cannot be configured via `pyproject.toml`, so arguments need be provided as `--arg`.  
+There's an open `babel` issue for adding `pyproject.toml` support: [link](https://github.com/python-babel/babel/issues/777)
+
 ## invenio-edugain at Invenio RDM Meeting 2025
 
 Our team was present at the Invenio RDM Meeting 2025 ([invitation](https://herrner.github.io/irdm2025/), [indico](https://www.conferences.uni-hamburg.de/event/548/overview)).
