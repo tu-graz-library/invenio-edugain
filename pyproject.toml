@@ -81,6 +81,24 @@ ingest_idp_data = "invenio_edugain.jobs:IngestIdPDataJob"
 Repository = "https://github.com/tu-graz-library/invenio-edugain"
 
 
+# Tools, in alphabetical order
+[[tool.babel.mappings]]
+encoding = 'utf-8'
+method = 'python'
+pattern = '**.py'
+
+[[tool.babel.mappings]]
+encoding = 'utf-8'
+method = 'jinja2'
+pattern = '**/templates/**.html'
+
+[[tool.babel.mappings]]
+encoding = 'utf-8'
+extract_messages = "$._, jQuery._"
+method = 'javascript'
+pattern = '**.js'
+
+
 [tool.hatch.build]
 exclude = [
   "run-tests.sh",
