@@ -25,19 +25,19 @@ readme = "README.rst"
 requires-python = ">=3.12"
 dependencies = [
   "invenio-celery>=2.0.0,<3.0.0",
-  "invenio-db>=2.0.0,<3.0.0",
-  "invenio-jobs>=4.0.0,<5.0.0",
+  "invenio-db>=2.2.0,<3.0.0",
+  "invenio-jobs>=7.0.0,<8.0.0",
   "pysaml2>=7.5.0",
   "validators>=0.21",
 ]
 
 [project.optional-dependencies]
 tests = [
-  "invenio-app>=2.0.0,<3.0.0",
-  "invenio-db[postgresql]>=2.0.0,<3.0.0",
+  "invenio-app>=3.0.0,<4.0.0",
+  "invenio-db[postgresql]>=2.2.0,<3.0.0",
   'lxml>=4.5.2',
   "pytest-black>=0.6.0",
-  "pytest-invenio>=3.0.0",
+  "pytest-invenio>=4.0.0",
   "ruff>=0.9.6",
 ]
 elasticsearch7 = [
