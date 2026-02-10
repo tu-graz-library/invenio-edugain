@@ -1,6 +1,13 @@
 Changes
 =======
 
+Version v0.2.0 (released 2026-02-10)
+
+- fix: readme after changing to rst
+- feat: implement translations
+- feat: add cli for IdP management
+- feat: add step-by-step instructions to readme
+
 Version v0.1.0 (released 2026-02-09)
 
 - chore(setup): bump dependencies
