@@ -1,6 +1,10 @@
 Changes
 =======
 
+Version v0.2.2 (released 2026-02-12)
+
+- fix(alembic): default wasn't enough
+
 Version v0.2.1 (released 2026-02-12)
 
 - fix(alembic): not applicable script
