@@ -1,6 +1,10 @@
 Changes
 =======
 
+Version v0.2.1 (released 2026-02-12)
+
+- fix(alembic): not applicable script
+
 Version v0.2.0 (released 2026-02-10)
 
 - fix: readme after changing to rst
