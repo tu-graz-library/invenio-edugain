@@ -256,3 +256,6 @@ class UninitializedConfig:
     __ior__ = __raise_error
     __reversed__ = __raise_error
     __hash__ = __raise_error
+
+    # Callable interface
+    __call__ = __raise_error

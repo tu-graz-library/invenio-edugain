@@ -30,6 +30,7 @@ from saml2.mdstore import MetadataStore
 from saml2.metadata import entity_descriptor
 from werkzeug.wrappers import Response as BaseResponse
 
+from .build_config.utils import UninitializedConfig
 from .models import IdPData
 from .utils import (
     NS_PREFIX,
@@ -249,7 +250,8 @@ def create_blueprint(app: Flask) -> Blueprint:
                 "Please decide whether you allow 'imgsrc: *' Content-Security-Policy for discovery page, "
                 "then set EDUGAIN_ALLOW_IMGSRC_CSP accordingly"
             )
-            raise ValueError(msg)
+            app.logger.warning(msg)
+            discover_view = UninitializedConfig(ValueError(msg))
 
     blueprint.add_url_rule(routes["acs"], methods=["POST"], view_func=acs)
     blueprint.add_url_rule(routes["authn-request"], view_func=authn_request)
