@@ -1,6 +1,10 @@
 Changes
 =======
 
+Version v0.2.3 (released 2026-06-11)
+
+- chore(setup): remove Invenio dependencies upper pin
+
 Version v0.2.2 (released 2026-02-12)
 
 - fix(alembic): default wasn't enough
