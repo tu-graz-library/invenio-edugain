@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2025 Graz University of Technology.
+# Copyright (C) 2025-2026 Graz University of Technology.
 #
 # invenio-edugain is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -79,7 +79,7 @@ Only used in automatic config-building.
 #
 # Configuration for discovery service
 #
-EDUGAIN_DISCOVERY_ADDITION_REQUEST_EMAIL: str | None | NotConfiguredType = (
+EDUGAIN_DISCOVERY_ADDITION_REQUEST_EMAIL: str | NotConfiguredType | None = (
     NOT_CONFIGURED
 )
 """Email for requesting an institution be added to the list of discoverable IdPs.

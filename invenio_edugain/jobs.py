@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2025 Graz University of Technology.
+# Copyright (C) 2025-2026 Graz University of Technology.
 #
 # invenio-edugain is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -64,13 +64,13 @@ class IngestIdPDataJob(JobType):
     title = _("edugain/SAML: ingest identity provider data")
 
     @classmethod
-    def build_task_arguments(
+    def build_task_arguments(  # noqa: PLR0917
         cls,
         job_obj: Job,  # noqa: ARG003
         since: datetime | None = None,  # noqa: ARG003
-        metadata_xml_location: str | None | AbsentType = ABSENT,
-        cert_location: str | None | AbsentType = ABSENT,
-        fingerprint_sha256: str | None | AbsentType = ABSENT,
+        metadata_xml_location: str | AbsentType | None = ABSENT,
+        cert_location: str | AbsentType | None = ABSENT,
+        fingerprint_sha256: str | AbsentType | None = ABSENT,
         job_arg_schema: str | None = None,  # noqa: ARG003
     ) -> dict:
         """Generate arguments for task.

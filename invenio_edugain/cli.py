@@ -157,10 +157,11 @@ def search(regex: str) -> None:
 def manage(  # noqa: C901
     ctx: Context,
     idp_ids: tuple[str, ...],
-    disable: bool,  # noqa: FBT001
-    enable: bool,  # noqa: FBT001
-    hide: bool,  # noqa: FBT001
-    show: bool,  # noqa: FBT001
+    *,
+    disable: bool,
+    enable: bool,
+    hide: bool,
+    show: bool,
 ) -> None:
     """Manage given IdPs' configuration in db (enable/disble, show/hide).
 

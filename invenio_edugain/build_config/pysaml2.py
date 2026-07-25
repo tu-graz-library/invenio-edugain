@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2025 Graz University of Technology.
+# Copyright (C) 2025-2026 Graz University of Technology.
 #
 # invenio-edugain is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -23,10 +23,10 @@ type JSONplusTuples = (
     | int
     | float
     | bool
-    | None
     | dict[str, JSONplusTuples]
     | list[JSONplusTuples]
     | tuple[JSONplusTuples, ...]  # unlike JSON, this also contains tuples
+    | None
 )
 """JSON extended by tuples, for typing pysaml2 config (which includes tuples).
 

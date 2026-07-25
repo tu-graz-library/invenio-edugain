@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2025 Graz University of Technology.
+# Copyright (C) 2025-2026 Graz University of Technology.
 #
 # invenio-edugain is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -19,7 +19,7 @@ from uritools import uricompose, urisplit
 
 from ..utils import ABSENT
 
-type JSON = str | int | float | bool | None | dict[str, JSON] | list[JSON]
+type JSON = str | int | float | bool | dict[str, JSON] | list[JSON] | None
 
 
 class EdugainConfigCoreExceptionGroup(ExceptionGroup):
