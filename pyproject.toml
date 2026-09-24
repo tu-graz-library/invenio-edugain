@@ -74,6 +74,9 @@ invenio_edugain = "invenio_edugain:alembic"
 [project.entry-points."invenio_db.models"]
 invenio_edugain = "invenio_edugain.models"
 
+[project.entry-points."invenio_i18n.translations"]
+messages = "invenio_edugain"
+
 [project.entry-points."invenio_jobs.jobs"]
 ingest_idp_data = "invenio_edugain.jobs:IngestIdPDataJob"
 
